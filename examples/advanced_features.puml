@@ -1,0 +1,100 @@
+@startuml
+title AdvancedFeaturesExample
+
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+package advanced_features_example {
+  abstract class Shape {
+    + name : str = name
+    --
+    # __init__(name: str)
+    + {abstract} area() : float
+    + {abstract} perimeter() : float
+    + describe() : str
+  }
+
+  class Rectangle {
+    + width : float = width
+    + height : float = height
+    --
+    # __init__(width: float, height: float)
+    + area() : float
+    + perimeter() : float
+  }
+
+  class Point {
+    + {static} x : float
+    + {static} y : float
+  }
+
+  class ImmutablePoint {
+    + {static} x : float
+    + {static} y : float
+  }
+
+  class Person {
+    + {static} name : str
+    + {static} age : int
+    + {static} email : str = ''
+    + {static} friends : List[str] = field(default_factory=list)
+    # {static} _internal_id : int = field(default=0, repr=False)
+  }
+
+  class Temperature {
+    # _celsius : float = celsius
+    --
+    # __init__(celsius: float)
+    + celsius() : float
+    + celsius(value: float) : None
+    + fahrenheit() : float
+    + fahrenheit(value: float) : None
+  }
+
+  class MathUtils {
+    + {static} version : ClassVar[str] = '1.0'
+    --
+    + {static} add(a: float, b: float) : float
+    + {static} fibonacci(n: int) : int
+    + get_version() : str
+  }
+
+  class Drawable {
+    + draw() : str
+    + get_color() : str
+  }
+
+  class BankAccount {
+    # _balance : float = balance
+    --
+    # __init__(balance: float)
+    + balance() : float
+    + deposit(amount: float) : None
+    + withdraw(amount: float) : None
+  }
+
+  abstract class Employee {
+    + {static} name : str
+    + {static} employee_id : str
+    + {static} salary : float
+    --
+    + {abstract} calculate_bonus() : float
+    + annual_salary() : float
+  }
+
+  class Manager {
+    + {static} team_size : int = 0
+    --
+    + calculate_bonus() : float
+  }
+
+}
+
+Rectangle <|-- Shape : derived / base
+Manager <|-- Employee : derived / base
+
+@enduml

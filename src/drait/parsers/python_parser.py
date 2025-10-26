@@ -24,6 +24,7 @@ from drait.metamodel import (
     Visibility,
     Relationship,
     RelationshipType,
+    Decorator,
 )
 
 
@@ -110,14 +111,24 @@ class PythonParser:
         # Extract docstring
         docstring = ast.get_docstring(node)
 
+        # Phase 4: Extract decorators
+        decorators = self._extract_decorators(node.decorator_list)
+
         # Extract base classes
         base_classes = []
+        is_abstract = False
         for base in node.bases:
             if isinstance(base, ast.Name):
                 base_classes.append(base.id)
+                # Check for ABC base class
+                if base.id in ("ABC", "ABCMeta"):
+                    is_abstract = True
             elif isinstance(base, ast.Attribute):
-                # Handle cases like module.ClassName
-                base_classes.append(self._get_attribute_name(base))
+                # Handle cases like abc.ABC
+                base_name = self._get_attribute_name(base)
+                base_classes.append(base_name)
+                if "ABC" in base_name:
+                    is_abstract = True
 
         # Extract attributes from class body
         attributes = self._extract_class_attributes(node)
@@ -142,6 +153,8 @@ class PythonParser:
             attributes=attributes,
             methods=methods,
             docstring=docstring,
+            decorators=decorators,
+            is_abstract=is_abstract,
         )
 
         return cls
@@ -298,12 +311,16 @@ class PythonParser:
         # Extract docstring
         docstring = ast.get_docstring(node)
 
+        # Phase 4: Extract decorators
+        decorators = self._extract_decorators(node.decorator_list)
+
         # Determine visibility
         visibility = self._get_visibility_from_name(node.name)
 
         # Check for special method types
         is_static = self._is_static_method(node)
         is_class_method = self._is_class_method(node)
+        is_abstract = self._is_abstract_method(node)
 
         # Extract parameters (skip 'self' or 'cls')
         parameters = []
@@ -330,6 +347,8 @@ class PythonParser:
             visibility=visibility,
             is_static=is_static,
             is_class_method=is_class_method,
+            is_abstract=is_abstract,
+            decorators=decorators,
             docstring=docstring,
         )
 
@@ -593,6 +612,68 @@ class PythonParser:
                 return True
         return False
 
+    def _is_abstract_method(self, node: ast.FunctionDef) -> bool:
+        """Check if method has @abstractmethod decorator."""
+        for decorator in node.decorator_list:
+            if isinstance(decorator, ast.Name) and decorator.id == "abstractmethod":
+                return True
+            elif isinstance(decorator, ast.Attribute):
+                if decorator.attr == "abstractmethod":
+                    return True
+        return False
+
+    def _extract_decorators(self, decorator_list: List[ast.expr]) -> List[Decorator]:
+        """
+        Extract decorators from decorator list.
+
+        Args:
+            decorator_list: List of decorator AST nodes
+
+        Returns:
+            List of Decorator objects
+        """
+        decorators = []
+
+        for dec_node in decorator_list:
+            if isinstance(dec_node, ast.Name):
+                # Simple decorator like @property, @staticmethod
+                decorators.append(Decorator(name=dec_node.id))
+
+            elif isinstance(dec_node, ast.Attribute):
+                # Qualified decorator like @abc.abstractmethod
+                name = dec_node.attr
+                module = self._get_module_from_attribute(dec_node)
+                decorators.append(Decorator(name=name, module=module))
+
+            elif isinstance(dec_node, ast.Call):
+                # Decorator with arguments like @dataclass(frozen=True)
+                if isinstance(dec_node.func, ast.Name):
+                    name = dec_node.func.id
+                    module = None
+                elif isinstance(dec_node.func, ast.Attribute):
+                    name = dec_node.func.attr
+                    module = self._get_module_from_attribute(dec_node.func)
+                else:
+                    continue
+
+                # Extract arguments (simplified - just capture as strings)
+                arguments = {}
+                for i, arg in enumerate(dec_node.args):
+                    try:
+                        arguments[f"arg{i}"] = ast.unparse(arg)
+                    except:
+                        arguments[f"arg{i}"] = str(arg)
+
+                for keyword in dec_node.keywords:
+                    try:
+                        arguments[keyword.arg] = ast.unparse(keyword.value)
+                    except:
+                        arguments[keyword.arg] = str(keyword.value)
+
+                decorators.append(Decorator(name=name, module=module, arguments=arguments))
+
+        return decorators
+
     def _get_attribute_name(self, node: ast.Attribute) -> str:
         """Get full attribute name like module.ClassName."""
         parts = []
@@ -685,6 +766,10 @@ class PythonParser:
         relationships = []
 
         for attr in cls.attributes:
+            # Skip attributes without type annotations
+            if attr.type is None:
+                continue
+
             # Get the base type name (strip Optional, List, etc.)
             type_name = self._get_base_type_name(attr.type)
 
@@ -730,7 +815,7 @@ class PythonParser:
         relationships = []
 
         # Collect types already in attributes (to avoid duplicates)
-        attribute_types = {self._get_base_type_name(attr.type) for attr in cls.attributes}
+        attribute_types = {self._get_base_type_name(attr.type) for attr in cls.attributes if attr.type is not None}
 
         # Track unique dependencies
         dependencies = set()
@@ -739,6 +824,9 @@ class PythonParser:
             # Check parameters
             for param in method.parameters:
                 if param.name in ('self', 'cls'):
+                    continue
+                # Skip parameters without type annotations
+                if param.type is None:
                     continue
                 type_name = self._get_base_type_name(param.type)
                 if type_name in class_names and type_name not in attribute_types:
