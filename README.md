@@ -70,7 +70,7 @@ drait/
 ## Roadmap
 
 - [x] Architecture documentation (arc42)
-- [ ] Core metamodel design
+- [x] Core metamodel design
 - [ ] Python AST parser implementation
 - [ ] Code generator with templates
 - [ ] Diagram editor UI (React + Canvas/SVG)
