@@ -353,24 +353,183 @@ class PythonParser:
         """
         Parse type annotation to TypeReference.
 
-        Phase 1: Basic support for simple types.
-        Returns generic 'str' representation for complex types.
+        Phase 2: Advanced support for generics, Optional, Union, etc.
         """
         if isinstance(annotation, ast.Name):
-            # Simple type like 'str', 'int'
+            # Simple type like 'str', 'int', 'Any'
             return TypeReference(name=annotation.id)
 
         elif isinstance(annotation, ast.Constant):
             # String annotation like 'SomeClass'
             return TypeReference(name=str(annotation.value))
 
+        elif isinstance(annotation, ast.Subscript):
+            # Generic type like List[str], Dict[str, int], Optional[int]
+            return self._parse_subscript_type(annotation)
+
+        elif isinstance(annotation, ast.BinOp) and isinstance(annotation.op, ast.BitOr):
+            # Union type using | operator (Python 3.10+): str | int
+            return self._parse_union_type(annotation)
+
+        elif isinstance(annotation, ast.Attribute):
+            # Qualified type like typing.List, collections.OrderedDict
+            return self._parse_attribute_type(annotation)
+
         else:
-            # Complex type - convert to string for now
+            # Fallback: convert to string
             try:
                 type_str = ast.unparse(annotation)
                 return TypeReference(name=type_str)
             except:
                 return TypeReference(name="Any")
+
+    def _parse_subscript_type(self, node: ast.Subscript) -> TypeReference:
+        """
+        Parse subscripted type like List[str], Dict[str, int], Optional[int].
+
+        Args:
+            node: Subscript AST node
+
+        Returns:
+            TypeReference with type arguments
+        """
+        # Get the base type name
+        if isinstance(node.value, ast.Name):
+            base_name = node.value.id
+            module = None
+        elif isinstance(node.value, ast.Attribute):
+            # Handle typing.List, etc.
+            base_name = node.value.attr
+            module = self._get_module_from_attribute(node.value)
+        else:
+            # Fallback
+            try:
+                base_name = ast.unparse(node.value)
+                module = None
+            except:
+                base_name = "Any"
+                module = None
+
+        # Parse type arguments
+        type_args = []
+        if isinstance(node.slice, ast.Tuple):
+            # Multiple arguments like Dict[str, int]
+            for elt in node.slice.elts:
+                type_args.append(self._parse_type_annotation(elt))
+        else:
+            # Single argument like List[str]
+            type_args.append(self._parse_type_annotation(node.slice))
+
+        # Handle Optional specially
+        if base_name == "Optional":
+            # Optional[T] -> TypeReference with is_optional=True
+            if type_args:
+                type_ref = type_args[0]
+                type_ref.is_optional = True
+                return type_ref
+            else:
+                return TypeReference(name="Any", is_optional=True)
+
+        # Handle Union
+        if base_name == "Union":
+            # For now, represent Union as string
+            # Future: could create a UnionType
+            types_str = ", ".join(str(arg) for arg in type_args)
+            return TypeReference(name=f"Union[{types_str}]")
+
+        # Regular generic type
+        return TypeReference(
+            name=base_name,
+            module=module,
+            type_arguments=type_args,
+        )
+
+    def _parse_union_type(self, node: ast.BinOp) -> TypeReference:
+        """
+        Parse Union type using | operator (Python 3.10+).
+
+        Example: str | int | None
+
+        Args:
+            node: BinOp node with BitOr operator
+
+        Returns:
+            TypeReference representing union
+        """
+        # Collect all types in the union
+        types = []
+
+        def collect_union_types(n):
+            if isinstance(n, ast.BinOp) and isinstance(n.op, ast.BitOr):
+                collect_union_types(n.left)
+                collect_union_types(n.right)
+            else:
+                types.append(self._parse_type_annotation(n))
+
+        collect_union_types(node)
+
+        # Check if None is in the union (makes it optional)
+        has_none = any(
+            isinstance(t, TypeReference) and t.name == "None"
+            for t in types
+        )
+
+        if has_none:
+            # Filter out None
+            non_none_types = [t for t in types if t.name != "None"]
+
+            if len(non_none_types) == 1:
+                # Optional[T]
+                type_ref = non_none_types[0]
+                type_ref.is_optional = True
+                return type_ref
+            else:
+                # Union with None
+                types_str = " | ".join(str(t) for t in types)
+                return TypeReference(name=types_str)
+        else:
+            # Regular union without None
+            types_str = " | ".join(str(t) for t in types)
+            return TypeReference(name=types_str)
+
+    def _parse_attribute_type(self, node: ast.Attribute) -> TypeReference:
+        """
+        Parse attribute type like typing.List, collections.OrderedDict.
+
+        Args:
+            node: Attribute node
+
+        Returns:
+            TypeReference with module information
+        """
+        type_name = node.attr
+        module = self._get_module_from_attribute(node)
+
+        return TypeReference(name=type_name, module=module)
+
+    def _get_module_from_attribute(self, node: ast.Attribute) -> Optional[str]:
+        """
+        Extract module name from attribute node.
+
+        Args:
+            node: Attribute node
+
+        Returns:
+            Module name or None
+        """
+        if isinstance(node.value, ast.Name):
+            return node.value.id
+        elif isinstance(node.value, ast.Attribute):
+            # Nested attributes like a.b.c
+            parts = []
+            current = node.value
+            while isinstance(current, ast.Attribute):
+                parts.insert(0, current.attr)
+                current = current.value
+            if isinstance(current, ast.Name):
+                parts.insert(0, current.id)
+            return ".".join(parts)
+        return None
 
     def _infer_type_from_value(self, value_node: ast.expr) -> TypeReference:
         """

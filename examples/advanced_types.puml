@@ -1,0 +1,54 @@
+@startuml
+title AdvancedTypes
+
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+package advanced_types {
+  class DataContainer {
+    + items : List[str] = []
+    + mapping : Dict[str, int] = {}
+    + unique_values : Set[int] = set()
+    + coordinates : Tuple[float, float] = (0.0, 0.0)
+    + optional_name : Optional[str] = None
+    + nullable_value : Optional[int] = None
+    + nested_list : List[List[int]] = [[]]
+    + complex_map : Dict[str, List[int]] = {}
+    + graph : Dict[str, Set[str]] = {}
+    --
+    # __init__()
+    + process_items(items: List[str]) : Dict[str, int]
+    + find_value(key: str) : Optional[int]
+    + merge_data(primary: Dict[str, int], secondary: Dict[str, int]) : Dict[str, int]
+  }
+
+  class UserRepository {
+    + users : Dict[int, User] = {}
+    + cache : Optional[Dict[str, Any]] = None
+    --
+    # __init__()
+    + find_by_id(user_id: int) : Optional[User]
+    + find_all() : List[User]
+    + search(criteria: Dict[str, Union[str, int, bool]]) : List[User]
+  }
+
+  class User {
+    + id : int = id
+    + name : str = name
+    + email : Optional[str] = email
+    + tags : List[str] = tags or []
+    + metadata : Dict[str, Union[str, int, float]] = {}
+    --
+    # __init__(id: int, name: str, email: Optional[str], tags: List[str])
+    + add_tag(tag: str) : None
+    + get_metadata(key: str) : Union[str, int, float, None]
+  }
+
+}
+
+
+@enduml
