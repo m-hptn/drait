@@ -20,12 +20,12 @@ A Model-Driven Development (MDD) tool that enables software developers and archi
 
 Comprehensive architecture documentation is available in the [docs/arc42](docs/arc42/) directory, following the arc42 template:
 
-- [Architecture Documentation](docs/arc42/src/docs/arc42.adoc) - Main documentation (AsciiDoc format)
-- [View Documentation Instructions](docs/arc42/README.md) - How to render and view the docs
+- [Architecture Documentation Source](docs/arc42/src/docs/arc42.adoc) - AsciiDoc source files
+- [Local Build Instructions](docs/arc42/README.md) - How to render documentation locally
 
-### Quick Documentation Preview
+### Local Documentation Build
 
-To generate HTML documentation:
+To generate HTML documentation locally:
 
 ```bash
 cd docs/arc42
@@ -34,6 +34,8 @@ chmod +x dtcw
 ./dtcw generateHTML
 xdg-open build/html5/arc42.html
 ```
+
+> **Note**: A GitHub Actions workflow is configured in [.github/workflows/docs.yml](.github/workflows/docs.yml) that will automatically build and deploy documentation to GitHub Pages when the repository becomes public.
 
 ## Project Structure
 
