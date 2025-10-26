@@ -1,0 +1,36 @@
+@startuml
+title SampleProject
+
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+package sample {
+  class Person {
+    + name : Any = name
+    + age : Any = age
+    # _id : int = 0
+    --
+    # __init__(name: str, age: int)
+    + greet() : str
+    + celebrate_birthday()
+  }
+
+  class Employee {
+    + {static} company_name : str = 'ACME Corp'
+    + employee_id : Any = employee_id
+    - __salary : float = 0.0
+    --
+    # __init__(name: str, age: int, employee_id: str)
+    + get_info() : str
+    + {static} get_company() : str
+    + create_intern(name: str, age: int)
+  }
+
+}
+
+
+@enduml

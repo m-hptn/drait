@@ -1,0 +1,182 @@
+@startuml
+title DRAIT Metamodel
+
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+package metamodel {
+  class Visibility {
+    + {static} PUBLIC : str = 'public'
+    + {static} PROTECTED : str = 'protected'
+    + {static} PRIVATE : str = 'private'
+  }
+
+  class RelationshipType {
+    + {static} INHERITANCE : str = 'inheritance'
+    + {static} ASSOCIATION : str = 'association'
+    + {static} AGGREGATION : str = 'aggregation'
+    + {static} COMPOSITION : str = 'composition'
+    + {static} DEPENDENCY : str = 'dependency'
+    + {static} REALIZATION : str = 'realization'
+  }
+
+  class ParameterKind {
+    + {static} POSITIONAL : str = 'positional'
+    + {static} KEYWORD : str = 'keyword'
+    + {static} VAR_POSITIONAL : str = 'var_positional'
+    + {static} VAR_KEYWORD : str = 'var_keyword'
+  }
+
+  class Multiplicity {
+    + {static} ZERO_TO_ONE : str = '0..1'
+    + {static} ONE : str = '1'
+    + {static} ZERO_TO_MANY : str = '0..*'
+    + {static} ONE_TO_MANY : str = '1..*'
+    + {static} MANY : str = '*'
+  }
+
+  class Position {
+    + {static} x : float
+    + {static} y : float
+    + {static} width : Optional[float] = None
+    + {static} height : Optional[float] = None
+    --
+    + to_dict() : Dict[str, Any]
+    + from_dict(data: Dict[str, Any]) : Position
+  }
+
+  class Import {
+    + {static} module : str
+    + {static} symbols : List[str] = field(default_factory=list)
+    + {static} alias : Optional[str] = None
+    --
+    + to_dict() : Dict[str, Any]
+    + from_dict(data: Dict[str, Any]) : Import
+  }
+
+  class TypeReference {
+    + {static} name : str
+    + {static} module : Optional[str] = None
+    + {static} type_arguments : List['TypeReference'] = field(default_factory=list)
+    + {static} is_optional : bool = False
+    --
+    + to_dict() : Dict[str, Any]
+    + from_dict(data: Dict[str, Any]) : TypeReference
+    # __str__() : str
+  }
+
+  class Decorator {
+    + {static} name : str
+    + {static} module : Optional[str] = None
+    + {static} arguments : Dict[str, str] = field(default_factory=dict)
+    --
+    + to_dict() : Dict[str, Any]
+    + from_dict(data: Dict[str, Any]) : Decorator
+  }
+
+  class Parameter {
+    + {static} name : str
+    + {static} type : Optional[TypeReference] = None
+    + {static} default_value : Optional[str] = None
+    + {static} kind : ParameterKind = ParameterKind.POSITIONAL
+    --
+    + to_dict() : Dict[str, Any]
+    + from_dict(data: Dict[str, Any]) : Parameter
+  }
+
+  class Attribute {
+    + {static} name : str
+    + {static} type : TypeReference
+    + {static} id : UUID = field(default_factory=uuid4)
+    + {static} visibility : Visibility = Visibility.PUBLIC
+    + {static} default_value : Optional[str] = None
+    + {static} is_static : bool = False
+    + {static} is_readonly : bool = False
+    + {static} decorators : List[Decorator] = field(default_factory=list)
+    + {static} docstring : Optional[str] = None
+    --
+    + to_dict() : Dict[str, Any]
+    + from_dict(data: Dict[str, Any]) : Attribute
+  }
+
+  class Method {
+    + {static} name : str
+    + {static} id : UUID = field(default_factory=uuid4)
+    + {static} parameters : List[Parameter] = field(default_factory=list)
+    + {static} return_type : Optional[TypeReference] = None
+    + {static} visibility : Visibility = Visibility.PUBLIC
+    + {static} is_static : bool = False
+    + {static} is_class_method : bool = False
+    + {static} is_abstract : bool = False
+    + {static} decorators : List[Decorator] = field(default_factory=list)
+    + {static} docstring : Optional[str] = None
+    + {static} body : Optional[str] = None
+    --
+    + to_dict() : Dict[str, Any]
+    + from_dict(data: Dict[str, Any]) : Method
+  }
+
+  class Class {
+    + {static} name : str
+    + {static} id : UUID = field(default_factory=uuid4)
+    + {static} attributes : List[Attribute] = field(default_factory=list)
+    + {static} methods : List[Method] = field(default_factory=list)
+    + {static} decorators : List[Decorator] = field(default_factory=list)
+    + {static} stereotypes : List[str] = field(default_factory=list)
+    + {static} base_classes : List[str] = field(default_factory=list)
+    + {static} is_abstract : bool = False
+    + {static} docstring : Optional[str] = None
+    + {static} position : Optional[Position] = None
+    + {static} metadata : Dict[str, Any] = field(default_factory=dict)
+    --
+    + to_dict() : Dict[str, Any]
+    + from_dict(data: Dict[str, Any]) : Class
+  }
+
+  class Relationship {
+    + {static} type : RelationshipType
+    + {static} source_id : UUID
+    + {static} target_id : UUID
+    + {static} id : UUID = field(default_factory=uuid4)
+    + {static} source_role : Optional[str] = None
+    + {static} target_role : Optional[str] = None
+    + {static} source_multiplicity : Optional[Multiplicity] = None
+    + {static} target_multiplicity : Optional[Multiplicity] = None
+    + {static} is_navigable_from_source : bool = True
+    + {static} is_navigable_from_target : bool = True
+    --
+    + to_dict() : Dict[str, Any]
+    + from_dict(data: Dict[str, Any]) : Relationship
+  }
+
+  class Package {
+    + {static} name : str
+    + {static} id : UUID = field(default_factory=uuid4)
+    + {static} classes : List[Class] = field(default_factory=list)
+    + {static} relationships : List[Relationship] = field(default_factory=list)
+    + {static} imports : List[Import] = field(default_factory=list)
+    + {static} docstring : Optional[str] = None
+    --
+    + to_dict() : Dict[str, Any]
+    + from_dict(data: Dict[str, Any]) : Package
+  }
+
+  class Project {
+    + {static} name : str
+    + {static} id : UUID = field(default_factory=uuid4)
+    + {static} version : str = '1.0.0'
+    + {static} packages : List[Package] = field(default_factory=list)
+    + {static} metadata : Dict[str, Any] = field(default_factory=dict)
+    --
+    + to_dict() : Dict[str, Any]
+    + from_dict(data: Dict[str, Any]) : Project
+  }
+
+}
+
+
+@enduml
