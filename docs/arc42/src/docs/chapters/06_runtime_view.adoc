@@ -1,0 +1,202 @@
+[[section-runtime-view]]
+== Runtime View
+
+=== Scenario 1: User Creates Class Diagram and Generates Code
+
+[plantuml, create-diagram-flow, svg]
+----
+@startuml
+actor User
+participant "Diagram Editor" as DE
+participant "UI Controller" as UC
+participant "Synchronization Engine" as SE
+participant "Diagram Model Manager" as DMM
+participant "Code Generator" as CG
+participant "File System Manager" as FSM
+
+User -> DE: Draw class diagram
+activate DE
+DE -> UC: Diagram element added
+activate UC
+UC -> DMM: Create class element
+activate DMM
+DMM -> DMM: Validate diagram
+DMM --> UC: Class created
+deactivate DMM
+
+UC -> SE: Trigger diagram-to-code sync
+activate SE
+SE -> DMM: Get diagram model
+activate DMM
+DMM --> SE: Diagram model
+deactivate DMM
+
+SE -> CG: Generate code from model
+activate CG
+CG -> CG: Apply templates
+CG --> SE: Generated Python code
+deactivate CG
+
+SE -> FSM: Write code to file
+activate FSM
+FSM -> FSM: Save .py file
+FSM --> SE: File saved
+deactivate FSM
+
+SE --> UC: Synchronization complete
+deactivate SE
+UC --> DE: Update UI status
+deactivate UC
+DE --> User: Show generated code
+deactivate DE
+
+@enduml
+----
+
+**Description:**
+
+. User interacts with diagram editor to create classes, attributes, and relationships
+. UI controller updates diagram model through Diagram Model Manager
+. Synchronization engine detects diagram change
+. Code generator creates Python code from diagram model
+. File system manager writes generated code to .py file
+. User sees generated code in code viewer
+
+=== Scenario 2: User Modifies Python Code and Diagram Updates
+
+[plantuml, modify-code-flow, svg]
+----
+@startuml
+actor User
+participant "Code Editor" as CE
+participant "File System Watcher" as FSW
+participant "Synchronization Engine" as SE
+participant "Code Parser" as CP
+participant "Code Model Manager" as CMM
+participant "Diagram Builder" as DB
+participant "Diagram Model Manager" as DMM
+participant "Diagram Editor" as DE
+
+User -> CE: Edit Python code
+activate CE
+CE -> FSW: File changed event
+deactivate CE
+activate FSW
+
+FSW -> SE: Code change detected
+activate SE
+SE -> CP: Parse modified code
+activate CP
+CP -> CP: Build AST
+CP -> CMM: Update code model
+activate CMM
+CMM -> CMM: Store AST & metadata
+CMM --> CP: Model updated
+deactivate CMM
+CP --> SE: Parsing complete
+deactivate CP
+
+SE -> DB: Build diagram from code model
+activate DB
+DB -> CMM: Get code model
+activate CMM
+CMM --> DB: Code model
+deactivate CMM
+DB -> DB: Infer relationships
+DB -> DMM: Update diagram model
+activate DMM
+DMM -> DMM: Validate changes
+DMM --> DB: Diagram updated
+deactivate DMM
+DB --> SE: Build complete
+deactivate DB
+
+SE -> DE: Refresh diagram view
+activate DE
+DE -> DE: Re-render diagram
+DE --> User: Show updated diagram
+deactivate DE
+deactivate SE
+deactivate FSW
+
+@enduml
+----
+
+**Description:**
+
+. User modifies Python code in external editor or integrated code view
+. File system watcher detects file change
+. Synchronization engine triggers code-to-diagram synchronization
+. Code parser analyzes Python code using AST
+. Code model manager updates internal code representation
+. Diagram builder creates/updates diagram elements from code model
+. Diagram editor re-renders visual representation
+. User sees updated diagram reflecting code changes
+
+=== Scenario 3: Conflict Resolution
+
+[plantuml, conflict-resolution, svg]
+----
+@startuml
+participant "Synchronization Engine" as SE
+participant "Diagram Model Manager" as DMM
+participant "Code Model Manager" as CMM
+participant "Conflict Resolver" as CR
+participant "UI Controller" as UC
+actor User
+
+SE -> DMM: Get diagram timestamp
+activate DMM
+DMM --> SE: Diagram modified at T1
+deactivate DMM
+
+SE -> CMM: Get code timestamp
+activate CMM
+CMM --> SE: Code modified at T2
+deactivate CMM
+
+SE -> SE: Detect conflict (T1 ≈ T2)
+SE -> CR: Resolve conflict
+activate CR
+
+CR -> DMM: Get diagram changes
+activate DMM
+DMM --> CR: Changed elements
+deactivate DMM
+
+CR -> CMM: Get code changes
+activate CMM
+CMM --> CR: Changed AST nodes
+deactivate CMM
+
+CR -> CR: Analyze differences
+
+alt Auto-resolvable conflict
+    CR -> CR: Apply merge strategy
+    CR --> SE: Merged model
+else Manual resolution required
+    CR -> UC: Request user input
+    activate UC
+    UC -> User: Show conflict dialog
+    User -> UC: Select resolution
+    UC --> CR: User decision
+    deactivate UC
+    CR -> CR: Apply user choice
+    CR --> SE: Resolved model
+end
+
+SE -> DMM: Update diagram
+SE -> CMM: Update code
+deactivate CR
+
+@enduml
+----
+
+**Description:**
+
+. Synchronization engine detects simultaneous changes to diagram and code
+. Conflict resolver analyzes both changes
+. For simple conflicts (e.g., only attribute reordering), auto-resolve
+. For complex conflicts (e.g., contradictory method signatures), prompt user
+. User selects which change to keep or manually merges
+. System updates both representations to maintain consistency

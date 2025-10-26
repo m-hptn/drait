@@ -1,0 +1,135 @@
+[[section-glossary]]
+== Glossary
+
+[cols="1,3" options="header"]
+|===
+| Term | Definition
+
+| Abstract Syntax Tree (AST)
+| Tree representation of the syntactic structure of source code. Python's `ast` module provides facilities to parse Python code into AST format for programmatic analysis.
+
+| Attribute
+| A data member of a class representing state or properties. In UML, shown in the middle section of a class box.
+
+| Bidirectional Transformation
+| Transformation that can operate in both forward (model to code) and backward (code to model) directions while maintaining consistency.
+
+| Class Diagram
+| UML diagram type showing classes, their attributes, methods, and relationships. Primary diagram type supported by this tool.
+
+| Code Generation
+| Automatic creation of source code from higher-level models or specifications. In this context, generating Python code from UML class diagrams.
+
+| Conflict Resolution
+| Process of reconciling contradictory changes when both diagram and code are modified simultaneously.
+
+| docToolchain
+| Documentation build tool that processes AsciiDoc files and generates various output formats (HTML, PDF). Used to render this arc42 documentation.
+
+| Electron
+| Framework for building cross-platform desktop applications using web technologies (HTML, CSS, JavaScript).
+
+| Event-Driven Architecture
+| Software architecture pattern where components communicate through events rather than direct method calls.
+
+| Forward Engineering
+| Process of generating code from design models (diagram → code).
+
+| Incremental Synchronization
+| Updating only the changed elements rather than regenerating/reparsing entire diagrams or codebases.
+
+| Inheritance
+| Object-oriented programming concept where a class derives from another class. Represented in UML with hollow arrow pointing to superclass.
+
+| Jinja2
+| Template engine for Python, used in this tool for generating code from templates.
+
+| Method
+| Function or operation defined within a class. In UML, shown in the bottom section of a class box.
+
+| Model-Driven Development (MDD)
+| Software development approach emphasizing creation and use of abstract models throughout the development lifecycle.
+
+| MVVM (Model-View-ViewModel)
+| Architectural pattern separating data model, user interface, and presentation logic. Used in this tool's architecture.
+
+| Relationship
+| Connection between classes in UML, including association, aggregation, composition, and inheritance.
+
+| Reverse Engineering
+| Process of generating design models from existing code (code → diagram).
+
+| Round-trip Engineering
+| Ability to make changes in either model or code and have those changes reflected in the other representation.
+
+| Serialization
+| Process of converting data structures into a format that can be stored (e.g., JSON) and later reconstructed.
+
+| Stereotype
+| UML extension mechanism for creating new kinds of modeling elements. Examples: «interface», «abstract», «entity».
+
+| Synchronization
+| Process of keeping diagram and code representations consistent with each other.
+
+| Template
+| Pre-defined code structure with placeholders that are filled in during code generation.
+
+| Type Hint
+| Python syntax (introduced in 3.5) for indicating expected types of variables, parameters, and return values. Used extensively in generated code.
+
+| UML (Unified Modeling Language)
+| Standardized visual modeling language for software systems. ISO/IEC 19505 standard.
+
+| Visibility
+| Access control level for class members. In Python/UML: public (no prefix), protected (_prefix), private (__prefix).
+
+| WYSIWYG
+| "What You See Is What You Get" - interface where editing view directly represents final output. Applied to diagram editor in this tool.
+|===
+
+=== Acronyms
+
+[cols="1,3" options="header"]
+|===
+| Acronym | Full Term
+
+| ADR | Architecture Decision Record
+
+| API | Application Programming Interface
+
+| AST | Abstract Syntax Tree
+
+| BX | Bidirectional Transformation
+
+| CI/CD | Continuous Integration / Continuous Deployment
+
+| CRUD | Create, Read, Update, Delete
+
+| JSON | JavaScript Object Notation
+
+| MDD | Model-Driven Development
+
+| MDE | Model-Driven Engineering
+
+| MVP | Minimum Viable Product
+
+| MVVM | Model-View-ViewModel
+
+| OOP | Object-Oriented Programming
+
+| PEP | Python Enhancement Proposal
+
+| REST | Representational State Transfer
+
+| SPA | Single-Page Application
+
+| SVG | Scalable Vector Graphics
+
+| UI | User Interface
+
+| UML | Unified Modeling Language
+
+| UUID | Universally Unique Identifier
+
+| YAML | YAML Ain't Markup Language
+|===

@@ -1,0 +1,99 @@
+[[section-solution-strategy]]
+== Solution Strategy
+
+=== Technology Decisions
+
+[cols="1,2,2" options="header"]
+|===
+| Decision | Technology Choice | Rationale
+
+| Programming Language
+| Python with TypeScript for UI
+| Python for backend/code generation logic; TypeScript/React for modern, responsive UI
+
+| Code Parsing
+| Python AST module
+| Native Python library, accurate parsing, no external dependencies
+
+| Code Generation
+| Template-based with Jinja2
+| Flexible, maintainable templates; easy to customize output format
+
+| Diagram Model
+| Custom metamodel with JSON serialization
+| Full control over model, version control friendly, extensible
+
+| Real-time Sync
+| File system watchers + event-driven architecture
+| Native OS file monitoring, efficient change detection
+
+| UI Framework
+| Electron + React + Canvas/SVG
+| Cross-platform, rich diagram drawing capabilities, large ecosystem
+|===
+
+=== Architectural Patterns
+
+==== Model-View-ViewModel (MVVM)
+
+* *Model*: Class diagram metamodel and Python code AST
+* *ViewModel*: Synchronization engine maintaining consistency
+* *View*: Diagram editor UI and code editor interface
+
+==== Event-Driven Architecture
+
+* File system changes trigger synchronization events
+* User interactions (diagram edits, code edits) emit events
+* Event handlers update corresponding representations
+* Prevents circular updates through event sourcing and versioning
+
+==== Bidirectional Transformation (BX)
+
+* *Forward transformation*: Diagram → Code generation
+* *Backward transformation*: Code → Diagram extraction
+* *Consistency maintenance*: Detect conflicts, resolve with user input
+* *Incremental updates*: Only transform changed elements
+
+=== Quality Goal Achievement
+
+[cols="1,3" options="header"]
+|===
+| Quality Goal | Approach
+
+| Real-time Performance
+| • File system watchers for instant change detection +
+• Incremental parsing/generation (only changed classes) +
+• Debouncing rapid changes +
+• Async processing to keep UI responsive
+
+| Accuracy
+| • AST-based parsing ensures semantic correctness +
+• Round-trip testing (Diagram → Code → Diagram) +
+• Schema validation for diagram model +
+• Python syntax validation before saving
+
+| Usability
+| • WYSIWYG diagram editor +
+• Split-view showing diagram and code side-by-side +
+• Visual feedback during synchronization +
+• Undo/redo support for both diagram and code changes
+
+| Extensibility
+| • Plugin architecture for language support +
+• Configurable code generation templates +
+• Metamodel supports extension for other diagram types
+
+| Reliability
+| • Transactional updates (all-or-nothing synchronization) +
+• Automatic backup before transformations +
+• Conflict detection with manual resolution UI +
+• Comprehensive logging for troubleshooting
+|===
+
+=== Key Design Decisions
+
+. *Text-based Diagram Storage*: Store diagrams as JSON for Git compatibility and human readability
+. *Non-destructive Code Generation*: Generated code sections marked with comments; manual code preserved
+. *Incremental Synchronization*: Only update affected classes, not entire codebase
+. *Conflict Resolution*: When diagram and code both change, timestamp-based or user-assisted resolution
+. *One-way vs Bidirectional*: Full bidirectional support from day one to enable flexible workflows

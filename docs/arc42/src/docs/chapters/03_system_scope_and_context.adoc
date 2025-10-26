@@ -1,0 +1,88 @@
+[[section-system-scope-and-context]]
+== System Scope and Context
+
+=== Business Context
+
+[plantuml, business-context, svg]
+----
+@startuml
+!include <C4/C4_Context>
+
+Person(architect, "Software Architect", "Creates and maintains system designs")
+Person(developer, "Software Developer", "Implements and refactors code")
+
+System(mdd_tool, "Model-Driven Development Tool", "Bidirectional synchronization between class diagrams and Python code")
+
+System_Ext(vcs, "Version Control System", "Git repository")
+System_Ext(ide, "IDE/Code Editor", "VS Code, PyCharm, etc.")
+System_Ext(python_runtime, "Python Runtime", "Python 3.8+")
+
+Rel(architect, mdd_tool, "Creates/edits class diagrams")
+Rel(developer, mdd_tool, "Edits code, views diagrams")
+Rel(mdd_tool, vcs, "Saves diagrams and code")
+Rel(mdd_tool, ide, "Optional integration")
+Rel(mdd_tool, python_runtime, "Validates generated code")
+
+@enduml
+----
+
+**Business Context Description:**
+
+[cols="1,3" options="header"]
+|===
+| Neighbor | Description
+
+| Software Architect
+| Primary user who creates and maintains class diagrams representing system design. Expects visual modeling capabilities and code generation.
+
+| Software Developer
+| Primary user who writes and refactors code. Expects automatic diagram updates and ability to understand system structure visually.
+
+| Version Control System
+| External system (Git) where both diagram definitions and generated/synchronized code are stored for team collaboration and history tracking.
+
+| IDE/Code Editor
+| External development environment where developers write code. May integrate with the tool for enhanced workflow.
+
+| Python Runtime
+| External system used to validate syntax and semantics of generated Python code.
+|===
+
+=== Technical Context
+
+**Technical Interfaces:**
+
+[cols="1,2,2" options="header"]
+|===
+| Interface | Technology | Purpose
+
+| Diagram Storage
+| JSON/YAML or PlantUML text format
+| Persistent storage of diagram definitions in version-controllable format
+
+| Code Generation Output
+| Python .py files
+| Generated Python source code with classes, attributes, methods
+
+| Code Parsing Input
+| Python AST (Abstract Syntax Tree)
+| Parse existing Python code to extract class structure
+
+| User Interface
+| Web-based (Electron) or Desktop GUI
+| Interactive diagram editor and code viewer
+
+| File System
+| OS file system APIs
+| Read/write diagram and code files, monitor changes
+
+| Configuration
+| TOML/YAML configuration files
+| User preferences, code generation templates, synchronization rules
+|===
+
+**Data Flow:**
+
+* *Diagram → Code*: User creates/modifies class diagram → Tool generates Python code → Code saved to file system
+* *Code → Diagram*: User modifies Python code → Tool parses code → Diagram updated in real-time
+* *Persistence*: Both diagram definitions and code committed to version control as text files

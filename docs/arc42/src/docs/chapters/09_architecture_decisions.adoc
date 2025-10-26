@@ -1,0 +1,287 @@
+[[section-design-decisions]]
+== Architecture Decisions
+
+=== ADR-001: Use Python AST for Code Parsing
+
+**Status:** Accepted
+
+**Context:**
+
+Need to parse Python code accurately to extract class structure. Options include regex, custom parser, or Python's built-in AST module.
+
+**Decision:**
+
+Use Python's built-in `ast` module for parsing Python source code.
+
+**Consequences:**
+
+* *Positive*:
+** Native Python library, no external dependencies
+** Accurate semantic parsing, not just syntactic
+** Handles all Python syntax correctly
+** Well-documented and maintained
+* *Negative*:
+** Tied to Python version compatibility
+** Requires Python runtime on target system
+
+---
+
+=== ADR-002: JSON Format for Diagram Storage
+
+**Status:** Accepted
+
+**Context:**
+
+Diagrams need to be stored in a format that is version-control friendly, human-readable, and easy to parse.
+
+**Decision:**
+
+Use JSON format for storing diagram definitions.
+
+**Alternatives Considered:**
+
+* PlantUML text format
+* XML
+* Binary format
+* YAML
+
+**Consequences:**
+
+* *Positive*:
+** Excellent version control support (text-based, line-by-line diffs)
+** Human-readable and editable
+** Native JavaScript/Python support
+** Industry standard
+* *Negative*:
+** Larger file size than binary formats
+** No schema enforcement without additional validation
+** Manual editing can break structure
+
+---
+
+=== ADR-003: Electron for Desktop Application
+
+**Status:** Accepted
+
+**Context:**
+
+Need cross-platform desktop application with rich UI capabilities for diagram editing.
+
+**Decision:**
+
+Use Electron framework with React for the user interface.
+
+**Alternatives Considered:**
+
+* Qt/PyQt
+* Native platform apps (separate for each OS)
+* Web application only
+* Flutter desktop
+
+**Consequences:**
+
+* *Positive*:
+** True cross-platform (Windows, macOS, Linux)
+** Rich ecosystem of JavaScript/React libraries
+** Modern UI capabilities (Canvas API, SVG)
+** Familiar technology stack for web developers
+* *Negative*:
+** Large application size (~100MB)
+** Higher memory footprint
+** Performance overhead compared to native apps
+
+---
+
+=== ADR-004: Bidirectional Synchronization from Day One
+
+**Status:** Accepted
+
+**Context:**
+
+Could implement either:
+1. Diagram-to-code only (simpler)
+2. Full bidirectional synchronization (complex)
+
+**Decision:**
+
+Implement full bidirectional synchronization from the start.
+
+**Consequences:**
+
+* *Positive*:
+** Supports both diagram-first and code-first workflows
+** Maximum flexibility for different developer preferences
+** Enables reverse engineering existing codebases
+** Differentiates product in market
+* *Negative*:
+** Significantly more complex implementation
+** Requires conflict resolution mechanism
+** Higher risk of bugs in synchronization logic
+** Longer development time
+
+---
+
+=== ADR-005: Template-based Code Generation
+
+**Status:** Accepted
+
+**Context:**
+
+Need to generate Python code from diagram models. Options include:
+1. String concatenation
+2. AST construction and unparsing
+3. Template-based generation
+
+**Decision:**
+
+Use Jinja2 templates for code generation.
+
+**Consequences:**
+
+* *Positive*:
+** Easy to customize code output format
+** Non-developers can modify templates
+** Clear separation of generation logic and output format
+** Supports different code styles/conventions
+* *Negative*:
+** Templates can become complex for advanced scenarios
+** Requires template validation
+** Runtime template processing overhead
+
+---
+
+=== ADR-006: Preserve Manual Code Sections
+
+**Status:** Accepted
+
+**Context:**
+
+When regenerating code from diagrams, need to decide whether to:
+1. Overwrite all code completely
+2. Preserve manual additions
+3. Hybrid approach
+
+**Decision:**
+
+Use code markers to identify auto-generated sections and preserve manual code.
+
+**Consequences:**
+
+* *Positive*:
+** Developers can add custom logic without losing it
+** Supports iterative development
+** Reduces fear of regeneration
+* *Negative*:
+** Requires careful marker management
+** Complexity in merging changes
+** Possible marker corruption by manual editing
+
+---
+
+=== ADR-007: Event-driven Synchronization Architecture
+
+**Status:** Accepted
+
+**Context:**
+
+Need to trigger synchronization when either diagram or code changes.
+
+**Decision:**
+
+Implement event-driven architecture with file system watchers and UI event emitters.
+
+**Consequences:**
+
+* *Positive*:
+** Real-time responsiveness
+** Decoupled components
+** Scalable architecture
+** Easy to add new event handlers
+* *Negative*:
+** Complexity in event ordering
+** Potential for event loops
+** Requires event debouncing
+** Harder to debug than synchronous flow
+
+---
+
+=== ADR-008: Python 3.8+ as Minimum Target
+
+**Status:** Accepted
+
+**Context:**
+
+Need to choose minimum Python version to support for code generation.
+
+**Decision:**
+
+Support Python 3.8 and above, generate code with type hints.
+
+**Consequences:**
+
+* *Positive*:
+** Modern Python features (type hints, dataclasses)
+** Still supported by major distributions
+** Better static analysis support
+** Future-proof for several years
+* *Negative*:
+** Excludes legacy Python 2.7 and early 3.x users
+** Cannot use newest Python 3.12+ features
+** Type hints add verbosity to generated code
+
+---
+
+=== ADR-009: File System as Primary Storage
+
+**Status:** Accepted
+
+**Context:**
+
+Could store diagrams and code in:
+1. Database
+2. File system
+3. Hybrid approach
+
+**Decision:**
+
+Use file system as primary storage for both diagrams and code.
+
+**Consequences:**
+
+* *Positive*:
+** Native Git integration
+** Standard development workflow
+** No database dependency
+** Easy backup and sharing
+** Works offline
+* *Negative*:
+** Concurrent access challenges
+** No built-in query capabilities
+** File system limitations on large projects
+
+---
+
+=== ADR-010: No Code Execution for Validation
+
+**Status:** Accepted
+
+**Context:**
+
+To validate generated code, could either:
+1. Execute code to check for runtime errors
+2. Use static analysis only
+
+**Decision:**
+
+Use only static analysis (AST parsing, type checking) without executing code.
+
+**Consequences:**
+
+* *Positive*:
+** Safe (no arbitrary code execution)
+** Fast validation
+** No side effects from validation
+* *Negative*:
+** Cannot detect runtime errors
+** Limited validation depth
+** Won't catch logic errors

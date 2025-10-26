@@ -1,0 +1,236 @@
+[[section-concepts]]
+== Cross-cutting Concepts
+
+=== Domain Model
+
+==== Core Entities
+
+[plantuml, domain-model, svg]
+----
+@startuml
+class Diagram {
+  +id: UUID
+  +name: String
+  +version: String
+  +created_at: DateTime
+  +modified_at: DateTime
+  +classes: List<Class>
+  +relationships: List<Relationship>
+}
+
+class Class {
+  +id: UUID
+  +name: String
+  +stereotype: String
+  +attributes: List<Attribute>
+  +methods: List<Method>
+  +position: Point
+}
+
+class Attribute {
+  +name: String
+  +type: String
+  +visibility: Visibility
+  +default_value: String
+  +is_static: Boolean
+}
+
+class Method {
+  +name: String
+  +parameters: List<Parameter>
+  +return_type: String
+  +visibility: Visibility
+  +is_abstract: Boolean
+  +is_static: Boolean
+}
+
+class Relationship {
+  +source: Class
+  +target: Class
+  +type: RelationType
+  +cardinality: String
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+  PROTECTED
+}
+
+enum RelationType {
+  ASSOCIATION
+  AGGREGATION
+  COMPOSITION
+  INHERITANCE
+  REALIZATION
+}
+
+Diagram "1" *-- "*" Class
+Diagram "1" *-- "*" Relationship
+Class "1" *-- "*" Attribute
+Class "1" *-- "*" Method
+Relationship "*" --> "1" Class : source
+Relationship "*" --> "1" Class : target
+
+@enduml
+----
+
+=== User Experience Concepts
+
+==== Split-View Interface
+
+* *Left Panel*: Interactive diagram editor with drag-and-drop
+* *Right Panel*: Code viewer/editor with syntax highlighting
+* *Synchronized Scrolling*: Clicking a class in diagram highlights corresponding code
+* *Live Updates*: Changes reflected in real-time across both views
+
+==== Visual Feedback
+
+* *Synchronization Indicator*: Shows when sync is in progress
+* *Change Highlighting*: Recently modified elements highlighted
+* *Validation Markers*: Visual indicators for errors or warnings
+* *Diff View*: Side-by-side comparison for conflict resolution
+
+=== Persistence and Serialization
+
+==== Diagram Serialization Format
+
+[source,json]
+----
+{
+  "diagram": {
+    "id": "uuid-here",
+    "name": "User Management",
+    "version": "1.0.0",
+    "classes": [
+      {
+        "id": "class-uuid-1",
+        "name": "User",
+        "attributes": [
+          {
+            "name": "username",
+            "type": "str",
+            "visibility": "public"
+          }
+        ],
+        "methods": [
+          {
+            "name": "authenticate",
+            "parameters": [{"name": "password", "type": "str"}],
+            "return_type": "bool",
+            "visibility": "public"
+          }
+        ],
+        "position": {"x": 100, "y": 100}
+      }
+    ],
+    "relationships": [
+      {
+        "source": "class-uuid-1",
+        "target": "class-uuid-2",
+        "type": "inheritance"
+      }
+    ]
+  }
+}
+----
+
+==== Code Generation Markers
+
+Generated Python code includes markers to preserve manual edits:
+
+[source,python]
+----
+# MDD-TOOL: AUTO-GENERATED - DO NOT MODIFY THIS SECTION
+class User:
+    """User class - auto-generated from diagram."""
+
+    def __init__(self):
+        self.username: str = ""
+# MDD-TOOL: END AUTO-GENERATED
+
+    # MDD-TOOL: MANUAL CODE BELOW - SAFE TO EDIT
+    def custom_method(self):
+        """This method won't be overwritten."""
+        pass
+----
+
+=== Security Concepts
+
+==== File System Access
+
+* Read/write only within designated project directories
+* No execution of arbitrary system commands
+* Validation of file paths to prevent directory traversal
+
+==== Code Validation
+
+* Syntax validation before saving generated code
+* AST-based parsing prevents code injection
+* Sandboxed execution for code validation (no eval/exec)
+
+==== Data Privacy
+
+* All data stored locally (desktop version)
+* No telemetry or external communication required
+* Version control integration uses existing Git credentials
+
+=== Error Handling and Logging
+
+==== Error Categories
+
+. *Syntax Errors*: Invalid Python code detected during parsing
+. *Validation Errors*: Diagram constraints violated (e.g., duplicate class names)
+. *Synchronization Errors*: Conflicts during bidirectional sync
+. *I/O Errors*: File system read/write failures
+
+==== Error Handling Strategy
+
+* *User-facing Errors*: Clear, actionable messages with suggested fixes
+* *Recoverable Errors*: Automatic retry with exponential backoff
+* *Critical Errors*: Preserve current state, prevent data loss
+* *Logging*: Structured logs with severity levels (DEBUG, INFO, WARNING, ERROR)
+
+==== Logging Structure
+
+[source,json]
+----
+{
+  "timestamp": "2025-10-26T10:30:00Z",
+  "level": "ERROR",
+  "component": "CodeGenerator",
+  "message": "Failed to generate code for class User",
+  "context": {
+    "diagram_id": "uuid-here",
+    "class_name": "User",
+    "error": "Invalid attribute type"
+  }
+}
+----
+
+=== Testing Concepts
+
+==== Round-trip Testing
+
+* *Forward Trip*: Diagram → Generated Code
+* *Backward Trip*: Generated Code → Reconstructed Diagram
+* *Assertion*: Original diagram ≈ Reconstructed diagram (semantic equivalence)
+
+==== Unit Testing Strategy
+
+* Parser tests: Verify correct AST extraction from Python code
+* Generator tests: Validate generated code syntax and structure
+* Synchronization tests: Ensure consistency under various scenarios
+
+==== Integration Testing
+
+* End-to-end workflow tests
+* File system watcher integration
+* Conflict resolution scenarios
+
+=== Internationalization
+
+* UI text externalized to resource files
+* Generated code comments in English (industry standard)
+* Support for Unicode in class/attribute/method names
+* Locale-aware date/time formatting in metadata

@@ -1,0 +1,190 @@
+[[section-building-block-view]]
+== Building Block View
+
+=== Whitebox Overall System
+
+[plantuml, system-overview, svg]
+----
+@startuml
+package "UI Layer" {
+  [Diagram Editor] as DE
+  [Code Viewer] as CV
+  [UI Controller] as UC
+}
+
+package "Core Layer" {
+  [Synchronization Engine] as SE
+  [Diagram Model Manager] as DMM
+  [Code Model Manager] as CMM
+}
+
+package "Transformation Layer" {
+  [Code Generator] as CG
+  [Code Parser] as CP
+  [Diagram Builder] as DB
+}
+
+package "Storage Layer" {
+  [File System Manager] as FSM
+  [Diagram Serializer] as DS
+  [Code Serializer] as CS
+}
+
+UC --> SE
+DE --> DMM
+CV --> CMM
+
+SE --> DMM
+SE --> CMM
+SE --> CG
+SE --> CP
+SE --> DB
+
+CG --> DMM
+CP --> CMM
+DB --> DMM
+
+DMM --> DS
+CMM --> CS
+DS --> FSM
+CS --> FSM
+
+@enduml
+----
+
+**Contained Building Blocks:**
+
+[cols="1,3" options="header"]
+|===
+| Component | Responsibility
+
+| UI Layer
+| User interaction, visual diagram editing, code display and editing
+
+| Core Layer
+| Business logic, model management, synchronization coordination
+
+| Transformation Layer
+| Bidirectional transformations between diagram and code representations
+
+| Storage Layer
+| Persistence, file I/O, serialization/deserialization
+|===
+
+=== Level 2: Core Layer Components
+
+==== Synchronization Engine
+
+**Purpose/Responsibility:**
+
+* Orchestrates bidirectional synchronization between diagram and code models
+* Detects changes through file system watchers and UI events
+* Manages synchronization conflicts
+* Ensures consistency between representations
+
+**Interfaces:**
+
+* `synchronize_diagram_to_code(diagram_id)`: Triggers code generation from diagram
+* `synchronize_code_to_diagram(file_path)`: Triggers diagram update from code
+* `resolve_conflict(conflict_info)`: Handles synchronization conflicts
+* `on_diagram_change(event)`: Event handler for diagram modifications
+* `on_code_change(event)`: Event handler for code modifications
+
+**Quality Attributes:**
+
+* Performance: Processes changes within 500ms
+* Reliability: Transactional updates with rollback on failure
+* Maintainability: Event-driven architecture allows easy extension
+
+==== Diagram Model Manager
+
+**Purpose/Responsibility:**
+
+* Manages in-memory representation of class diagrams
+* Provides CRUD operations for diagram elements
+* Validates diagram structure and constraints
+* Maintains diagram metadata (version, author, timestamp)
+
+**Interfaces:**
+
+* `get_diagram(diagram_id)`: Retrieve diagram by ID
+* `update_class(class_id, properties)`: Update class definition
+* `add_relationship(source, target, type)`: Add class relationship
+* `validate_diagram()`: Check diagram consistency
+
+**Data Model:**
+
+* Diagram: Container for classes and relationships
+* Class: Name, attributes, methods, stereotypes
+* Attribute: Name, type, visibility, default value
+* Method: Name, parameters, return type, visibility
+* Relationship: Association, aggregation, composition, inheritance
+
+==== Code Model Manager
+
+**Purpose/Responsibility:**
+
+* Manages in-memory representation of Python code structure
+* Provides access to parsed AST
+* Tracks code modifications
+* Maintains mapping between code elements and diagram elements
+
+**Interfaces:**
+
+* `get_code_model(file_path)`: Retrieve code model for file
+* `update_class_ast(class_name, ast_node)`: Update class AST
+* `extract_class_info(ast_node)`: Extract class metadata from AST
+* `validate_code()`: Check Python syntax and semantics
+
+=== Level 2: Transformation Layer Components
+
+==== Code Generator
+
+**Purpose/Responsibility:**
+
+* Generates Python code from diagram model
+* Uses templates for customizable output
+* Preserves manual code sections
+* Generates docstrings and type hints
+
+**Interfaces:**
+
+* `generate_class(class_model)`: Generate Python class code
+* `generate_method(method_model)`: Generate method stub
+* `generate_file(diagram)`: Generate complete Python module
+
+**Quality Attributes:**
+
+* Generates PEP 8 compliant code
+* Includes type hints for Python 3.8+
+* Preserves existing method implementations
+
+==== Code Parser
+
+**Purpose/Responsibility:**
+
+* Parses Python source code to extract class structure
+* Uses Python AST for accurate parsing
+* Extracts classes, attributes, methods, relationships
+* Handles inheritance and type annotations
+
+**Interfaces:**
+
+* `parse_file(file_path)`: Parse Python file to code model
+* `extract_classes(ast_tree)`: Extract class definitions
+* `infer_relationships(code_model)`: Detect class relationships
+
+==== Diagram Builder
+
+**Purpose/Responsibility:**
+
+* Constructs diagram model from code model
+* Infers diagram layout
+* Maps code elements to diagram elements
+* Handles reverse engineering of relationships
+
+**Interfaces:**
+
+* `build_diagram(code_model)`: Create diagram from code
+* `update_diagram_element(element, code_info)`: Update existing element
+* `infer_layout()`: Calculate diagram element positions

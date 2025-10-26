@@ -1,0 +1,189 @@
+[[section-deployment-view]]
+== Deployment View
+
+=== Deployment Scenario 1: Desktop Application
+
+[plantuml, desktop-deployment, svg]
+----
+@startuml
+node "Developer Workstation" {
+  node "Operating System\n(Windows/macOS/Linux)" {
+    component "Electron Runtime" {
+      [React UI Frontend]
+      [Node.js Backend]
+    }
+
+    component "Python Runtime" {
+      [Code Generator]
+      [Code Parser]
+      [Validation Engine]
+    }
+
+    database "File System" {
+      folder "Project Directory" {
+        artifact "diagram.json"
+        artifact "models.py"
+        artifact "config.yaml"
+      }
+    }
+
+    [React UI Frontend] --> [Node.js Backend]
+    [Node.js Backend] --> [Python Runtime]
+    [Python Runtime] --> [File System]
+  }
+}
+
+@enduml
+----
+
+**Description:**
+
+The desktop application runs as a standalone Electron application on the developer's local machine.
+
+**Infrastructure Elements:**
+
+[cols="1,3" options="header"]
+|===
+| Element | Description
+
+| Developer Workstation
+| Windows 10+, macOS 11+, or Linux machine with 4GB+ RAM
+
+| Electron Runtime
+| Cross-platform desktop framework bundling Chromium and Node.js
+
+| React UI Frontend
+| User interface for diagram editing and code viewing
+
+| Node.js Backend
+| Application logic, event coordination, file system interaction
+
+| Python Runtime
+| Python 3.8+ interpreter for code generation, parsing, and validation
+
+| File System
+| Local storage for diagram definitions, generated code, and configuration
+|===
+
+**Deployment Requirements:**
+
+* Python 3.8 or higher installed on the system
+* 500MB disk space for application
+* Network connection not required (fully offline capable)
+
+=== Deployment Scenario 2: Web-based Collaborative Version
+
+[plantuml, web-deployment, svg]
+----
+@startuml
+cloud "Internet" {
+}
+
+node "User Browser" {
+  [React SPA]
+  [Diagram Editor Canvas]
+}
+
+node "Web Server" {
+  [API Gateway]
+  [WebSocket Server]
+}
+
+node "Application Server" {
+  [Synchronization Service]
+  [Code Generation Service]
+  [Code Parsing Service]
+}
+
+database "Storage" {
+  [Document Database\n(MongoDB)]
+  [File Storage\n(S3/MinIO)]
+}
+
+[React SPA] --> [API Gateway] : HTTPS
+[Diagram Editor Canvas] --> [WebSocket Server] : WSS
+[API Gateway] --> [Synchronization Service]
+[WebSocket Server] --> [Synchronization Service]
+[Synchronization Service] --> [Code Generation Service]
+[Synchronization Service] --> [Code Parsing Service]
+[Code Generation Service] --> [Document Database]
+[Code Parsing Service] --> [Document Database]
+[Synchronization Service] --> [File Storage]
+
+@enduml
+----
+
+**Description:**
+
+Future web-based version for team collaboration with cloud storage.
+
+**Infrastructure Elements:**
+
+[cols="1,3" options="header"]
+|===
+| Element | Description
+
+| User Browser
+| Modern browser (Chrome, Firefox, Safari, Edge) running React SPA
+
+| Web Server
+| Nginx or similar serving static assets and proxying API requests
+
+| Application Server
+| Container-based deployment (Docker/Kubernetes) running Python services
+
+| Document Database
+| MongoDB for storing diagram models and metadata
+
+| File Storage
+| Object storage (S3, MinIO) for generated code and diagram exports
+|===
+
+=== Infrastructure Requirements
+
+==== Desktop Application
+
+[cols="1,2" options="header"]
+|===
+| Requirement | Specification
+
+| CPU
+| x64 or ARM64 processor, 2+ cores recommended
+
+| Memory
+| 4GB RAM minimum, 8GB recommended
+
+| Storage
+| 500MB for application, additional space for projects
+
+| Display
+| 1280x720 minimum resolution, 1920x1080 recommended
+
+| Operating System
+| Windows 10+, macOS 11+, Ubuntu 20.04+
+
+| Dependencies
+| Python 3.8+, Node.js 16+ (bundled with Electron)
+|===
+
+==== Web Application (Future)
+
+[cols="1,2" options="header"]
+|===
+| Component | Specification
+
+| Web Server
+| 2 vCPU, 4GB RAM
+
+| Application Server
+| 4 vCPU, 8GB RAM per instance, horizontal scaling
+
+| Database
+| MongoDB cluster, 3 nodes, 16GB RAM each
+
+| Storage
+| S3-compatible object storage, scalable
+
+| Network
+| Load balancer, HTTPS/WSS, CDN for static assets
+|===
