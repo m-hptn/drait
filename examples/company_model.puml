@@ -1,0 +1,42 @@
+@startuml
+title CompanyModel
+
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+package company {
+  abstract class Person {
+    + name : str
+    + age : int
+    # _id : int
+    --
+    + __init__(name: str, age: int)
+    + {abstract} get_info() : str
+  }
+
+  class Employee {
+    + employee_id : str
+    - salary : float
+    --
+    + get_info() : str
+    + calculate_bonus() : float
+  }
+
+  class Department {
+    + name : str
+    + employees : List[Employee]
+    --
+    + add_employee(employee: Employee)
+    + get_total_salary() : float
+  }
+
+}
+
+Employee <|-- Person
+Department "1" *-- "*" Employee : department / employees
+
+@enduml

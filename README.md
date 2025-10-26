@@ -71,13 +71,14 @@ drait/
 
 - [x] Architecture documentation (arc42)
 - [x] Core metamodel design
+- [x] PlantUML diagram export
 - [ ] Python AST parser implementation
 - [ ] Code generator with templates
+- [ ] Interactive diagram viewer (web-based)
 - [ ] Diagram editor UI (React + Canvas/SVG)
 - [ ] Synchronization engine
 - [ ] Conflict resolution mechanism
 - [ ] Desktop application (Electron)
-- [ ] Testing suite
 - [ ] User documentation
 - [ ] Beta release
 
