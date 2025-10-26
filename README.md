@@ -32,6 +32,12 @@ A Model-Driven Development (MDD) tool that enables software developers and archi
   - Composition for owned objects
   - Aggregation for shared/optional references
   - Dependencies from method signatures
+- **Phase 4**: Advanced Python features
+  - Abstract classes (ABC) and abstract methods
+  - Decorators (@dataclass, @property, @staticmethod, custom decorators)
+  - Properties with getter/setter/deleter
+  - Dataclasses with arguments and field metadata
+  - Protocol classes (typing.Protocol)
 
 ✅ **PlantUML Exporter** ([src/drait/exporters/plantuml.py](src/drait/exporters/plantuml.py))
 - Export metamodel to PlantUML diagrams
@@ -94,10 +100,11 @@ drait/
 - [x] Architecture documentation (arc42)
 - [x] Core metamodel design
 - [x] PlantUML diagram export
-- [x] Python AST parser implementation (Phase 1-3 complete)
+- [x] Python AST parser implementation (Phase 1-4 complete)
   - [x] Phase 1: Class, attribute, and method extraction
   - [x] Phase 2: Advanced type annotations (generics, Optional, Union)
   - [x] Phase 3: Relationship inference (inheritance, composition, aggregation, dependency)
+  - [x] Phase 4: Advanced features (ABC, decorators, properties, dataclasses)
 - [ ] Code generator with templates
 - [ ] Interactive diagram viewer (web-based)
 - [ ] Diagram editor UI (React + Canvas/SVG)
