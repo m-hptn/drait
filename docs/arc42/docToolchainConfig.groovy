@@ -23,9 +23,7 @@ inputPath = 'src/docs';
 // pdfThemeDir = './src/docs/pdfTheme'
 
 inputFiles = [
-        //[file: 'doctoolchain_demo.adoc',       formats: ['html','pdf']],
-        //[file: 'arc42-template.adoc',    formats: ['html','pdf']],
-        /** inputFiles **/
+        [file: 'arc42.adoc', formats: ['html','pdf']],
 ]
 
 //folders in which asciidoc will find images.
@@ -37,7 +35,7 @@ inputFiles = [
 // ifndef::imagesdir[:imagesdir: ./whatsoever]
 // as doctoolchain defines :imagesdir: during generation
 imageDirs = [
-    /** imageDirs **/
+    'images',
 ]
 
 // whether the build should fail when detecting broken image references
