@@ -14,7 +14,29 @@ A Model-Driven Development (MDD) tool that enables software developers and archi
 
 ## Status
 
-🚧 **Early Development** - This project is currently in the architecture and planning phase.
+🚧 **Active Development** - Core metamodel and Python parser are complete. Working on code generation next.
+
+### Completed Features
+
+✅ **Core Metamodel** ([src/drait/metamodel.py](src/drait/metamodel.py))
+- Complete UML class diagram representation
+- Support for classes, attributes, methods, parameters, relationships
+- Advanced type references with generics support
+- JSON serialization for git-friendly storage
+
+✅ **Python AST Parser** ([src/drait/parsers/python_parser.py](src/drait/parsers/python_parser.py))
+- **Phase 1**: Extract classes, attributes, methods with visibility detection
+- **Phase 2**: Advanced type annotations (List[T], Dict[K,V], Optional, Union, nested generics)
+- **Phase 3**: Automatic relationship inference
+  - Inheritance from base classes
+  - Composition for owned objects
+  - Aggregation for shared/optional references
+  - Dependencies from method signatures
+
+✅ **PlantUML Exporter** ([src/drait/exporters/plantuml.py](src/drait/exporters/plantuml.py))
+- Export metamodel to PlantUML diagrams
+- Full support for all relationship types
+- Preserves type information including generics
 
 ## Documentation
 
@@ -72,7 +94,10 @@ drait/
 - [x] Architecture documentation (arc42)
 - [x] Core metamodel design
 - [x] PlantUML diagram export
-- [ ] Python AST parser implementation
+- [x] Python AST parser implementation (Phase 1-3 complete)
+  - [x] Phase 1: Class, attribute, and method extraction
+  - [x] Phase 2: Advanced type annotations (generics, Optional, Union)
+  - [x] Phase 3: Relationship inference (inheritance, composition, aggregation, dependency)
 - [ ] Code generator with templates
 - [ ] Interactive diagram viewer (web-based)
 - [ ] Diagram editor UI (React + Canvas/SVG)

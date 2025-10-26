@@ -1,0 +1,115 @@
+@startuml
+title RelationshipsExample
+
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+  ArrowColor Black
+}
+
+package relationships_example {
+  class Employee {
+    + name : str = name
+    + employee_id : str = employee_id
+    + hire_date : datetime = datetime.now()
+    --
+    # __init__(name: str, employee_id: str)
+    + get_info() : str
+  }
+
+  class Manager {
+    + department : str = department
+    + team_size : int = 0
+    --
+    # __init__(name: str, employee_id: str, department: str)
+    + add_team_member() : None
+  }
+
+  class Engine {
+    + horsepower : int = horsepower
+    + cylinders : int = cylinders
+    --
+    # __init__(horsepower: int, cylinders: int)
+    + start() : None
+  }
+
+  class Car {
+    + model : str = model
+    + engine : Engine = Engine(horsepower, 4)
+    --
+    # __init__(model: str, horsepower: int)
+    + start_car() : None
+  }
+
+  class Department {
+    + name : str = name
+    + code : str = code
+    + budget : float = 0.0
+    --
+    # __init__(name: str, code: str)
+  }
+
+  class Person {
+    + name : str = name
+    + department : Optional[Department] = department
+    + projects : List[str] = []
+    --
+    # __init__(name: str, department: Optional[Department])
+    + assign_department(dept: Department) : None
+  }
+
+  class Order {
+    + order_id : str = order_id
+    + total : float = total
+    + status : str = 'pending'
+    --
+    # __init__(order_id: str, total: float)
+  }
+
+  class Customer {
+    + customer_id : str = customer_id
+    + name : str = name
+    + email : str = ''
+    --
+    # __init__(customer_id: str, name: str)
+  }
+
+  class OrderProcessor {
+    + processed_count : int = 0
+    --
+    # __init__()
+    + process_order(order: Order, customer: Customer) : bool
+    + validate_order(order: Order) : bool
+    + get_customer_info() : Customer
+  }
+
+  class Address {
+    + street : str = street
+    + city : str = city
+    --
+    # __init__(street: str, city: str)
+  }
+
+  class Company {
+    + name : str = name
+    + headquarters : Address = Address(street, city)
+    + employees : List[Employee] = []
+    --
+    # __init__(name: str, street: str, city: str)
+    + hire_employee(employee: Employee) : None
+    + process_payroll(processor: OrderProcessor) : None
+  }
+
+}
+
+Manager <|-- Employee : derived / base
+Car *-- Engine : owns
+Person o-- Department : has
+OrderProcessor ..> Customer : uses
+OrderProcessor ..> Order : uses
+Company *-- Address : owns
+Company o-- Employee : has
+Company ..> OrderProcessor : uses
+
+@enduml

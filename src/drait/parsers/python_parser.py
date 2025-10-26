@@ -22,6 +22,8 @@ from drait.metamodel import (
     Parameter,
     TypeReference,
     Visibility,
+    Relationship,
+    RelationshipType,
 )
 
 
@@ -81,11 +83,15 @@ class PythonParser:
                 if cls:
                     self.classes.append(cls)
 
+        # Phase 3: Infer relationships between classes
+        relationships = self._infer_relationships()
+
         # Create package
         package_name = Path(source_name).stem if source_name != "<string>" else "parsed"
         package = Package(
             name=package_name,
             classes=self.classes,
+            relationships=relationships,
             docstring=ast.get_docstring(tree),
         )
 
@@ -600,6 +606,196 @@ class PythonParser:
             parts.insert(0, current.id)
 
         return ".".join(parts)
+
+    def _infer_relationships(self) -> List[Relationship]:
+        """
+        Infer relationships between classes based on code patterns.
+
+        Phase 3: Relationship inference
+        - Inheritance: from base classes
+        - Composition: attributes created in __init__
+        - Aggregation: attributes passed as parameters
+        - Dependency: method parameters and return types
+
+        Returns:
+            List of inferred relationships
+        """
+        relationships = []
+
+        # Create class name to ID lookup
+        class_map = {cls.name: cls.id for cls in self.classes}
+        class_names = set(class_map.keys())
+
+        for cls in self.classes:
+            # 1. Inheritance relationships (from base_classes)
+            relationships.extend(self._infer_inheritance(cls, class_names, class_map))
+
+            # 2. Composition/Aggregation (from attributes)
+            relationships.extend(self._infer_composition_aggregation(cls, class_names, class_map))
+
+            # 3. Dependency (from method signatures)
+            relationships.extend(self._infer_dependencies(cls, class_names, class_map))
+
+        return relationships
+
+    def _infer_inheritance(self, cls: Class, class_names: set, class_map: dict) -> List[Relationship]:
+        """
+        Infer inheritance relationships from base_classes.
+
+        Args:
+            cls: Source class
+            class_names: Set of all class names in package
+            class_map: Map of class names to UUIDs
+
+        Returns:
+            List of inheritance relationships
+        """
+        relationships = []
+
+        for base_class in cls.base_classes:
+            # Only create relationship if target class is in same package
+            if base_class in class_names:
+                rel = Relationship(
+                    type=RelationshipType.INHERITANCE,
+                    source_id=cls.id,
+                    target_id=class_map[base_class],
+                    source_role="derived",
+                    target_role="base",
+                )
+                relationships.append(rel)
+
+        return relationships
+
+    def _infer_composition_aggregation(self, cls: Class, class_names: set, class_map: dict) -> List[Relationship]:
+        """
+        Infer composition/aggregation relationships from attributes.
+
+        Heuristic:
+        - Composition: Attribute type is instantiated in __init__ (ownership)
+        - Aggregation: Attribute type is passed as parameter (shared)
+
+        Args:
+            cls: Source class
+            class_names: Set of all class names in package
+            class_map: Map of class names to UUIDs
+
+        Returns:
+            List of composition/aggregation relationships
+        """
+        relationships = []
+
+        for attr in cls.attributes:
+            # Get the base type name (strip Optional, List, etc.)
+            type_name = self._get_base_type_name(attr.type)
+
+            # Only create relationship if target is a class in package
+            if type_name in class_names:
+                # Determine if it's composition or aggregation
+                # For now, use simple heuristic: if Optional or collection, it's aggregation
+                is_collection = self._is_collection_type(attr.type)
+                is_optional = attr.type.is_optional
+
+                if is_collection or is_optional:
+                    rel_type = RelationshipType.AGGREGATION
+                    source_role = "has"
+                else:
+                    rel_type = RelationshipType.COMPOSITION
+                    source_role = "owns"
+
+                rel = Relationship(
+                    type=rel_type,
+                    source_id=cls.id,
+                    target_id=class_map[type_name],
+                    source_role=source_role,
+                )
+                relationships.append(rel)
+
+        return relationships
+
+    def _infer_dependencies(self, cls: Class, class_names: set, class_map: dict) -> List[Relationship]:
+        """
+        Infer dependency relationships from method parameters and return types.
+
+        A dependency exists when a class uses another class in method signatures
+        but doesn't store it as an attribute.
+
+        Args:
+            cls: Source class
+            class_names: Set of all class names in package
+            class_map: Map of class names to UUIDs
+
+        Returns:
+            List of dependency relationships
+        """
+        relationships = []
+
+        # Collect types already in attributes (to avoid duplicates)
+        attribute_types = {self._get_base_type_name(attr.type) for attr in cls.attributes}
+
+        # Track unique dependencies
+        dependencies = set()
+
+        for method in cls.methods:
+            # Check parameters
+            for param in method.parameters:
+                if param.name in ('self', 'cls'):
+                    continue
+                type_name = self._get_base_type_name(param.type)
+                if type_name in class_names and type_name not in attribute_types:
+                    dependencies.add(type_name)
+
+            # Check return type
+            if method.return_type:
+                type_name = self._get_base_type_name(method.return_type)
+                if type_name in class_names and type_name not in attribute_types:
+                    dependencies.add(type_name)
+
+        # Create relationships
+        for target in dependencies:
+            rel = Relationship(
+                type=RelationshipType.DEPENDENCY,
+                source_id=cls.id,
+                target_id=class_map[target],
+                source_role="uses",
+            )
+            relationships.append(rel)
+
+        return relationships
+
+    def _get_base_type_name(self, type_ref: TypeReference) -> str:
+        """
+        Extract base type name from TypeReference.
+
+        Examples:
+        - List[Engine] -> Engine
+        - Optional[Department] -> Department
+        - Engine -> Engine
+
+        Args:
+            type_ref: Type reference to extract from
+
+        Returns:
+            Base type name
+        """
+        # If it has type arguments, get the first one (for List, Set, etc.)
+        if type_ref.type_arguments:
+            return self._get_base_type_name(type_ref.type_arguments[0])
+
+        return type_ref.name
+
+    def _is_collection_type(self, type_ref: TypeReference) -> bool:
+        """
+        Check if type is a collection (List, Set, Dict, etc.).
+
+        Args:
+            type_ref: Type reference to check
+
+        Returns:
+            True if collection type
+        """
+        collection_types = {'List', 'list', 'Set', 'set', 'Dict', 'dict',
+                           'Tuple', 'tuple', 'Sequence', 'Iterable'}
+        return type_ref.name in collection_types
 
 
 def parse_file_to_project(file_path: str, project_name: Optional[str] = None) -> Project:
