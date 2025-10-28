@@ -5,11 +5,6 @@ Converts DRAIT metamodel to PlantUML class diagram syntax for visualization.
 """
 
 from typing import List, Optional
-import sys
-from pathlib import Path
-
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from drait.metamodel import (
     Project,

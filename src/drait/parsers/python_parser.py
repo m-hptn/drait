@@ -8,10 +8,6 @@ Phase 1: Basic class, attribute, and method extraction.
 import ast
 from pathlib import Path
 from typing import List, Optional, Dict, Any
-import sys
-
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from drait.metamodel import (
     Project,
