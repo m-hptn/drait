@@ -6,6 +6,9 @@
  *
  * Security: Uses contextBridge to expose only specific functions,
  * preventing the React app from accessing all of Node.js APIs.
+ *
+ * NOTE: Preload scripts must use CommonJS (require) because Electron
+ * does not yet support ESM in preload context.
  */
 
 const { contextBridge, ipcRenderer } = require('electron');

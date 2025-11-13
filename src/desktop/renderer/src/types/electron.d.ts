@@ -24,6 +24,7 @@ export interface FileFilter {
 
 export interface ParseResult {
   success: boolean;
+  metamodel?: any;  // Project type from metamodel.ts
   output?: string;
   message?: string;
   error?: string;

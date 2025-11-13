@@ -1,0 +1,111 @@
+.class-node {
+  background: white;
+  border: 2px solid #374151;
+  border-radius: 4px;
+  min-width: 200px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.class-header {
+  background: #f3f4f6;
+  padding: 8px 12px;
+  border-bottom: 2px solid #374151;
+  text-align: center;
+}
+
+.class-stereotype {
+  font-size: 10px;
+  color: #6b7280;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+.class-decorators {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.decorator {
+  font-size: 10px;
+  color: #7c3aed;
+  background: #ede9fe;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.class-name {
+  font-weight: bold;
+  font-size: 14px;
+  color: #111827;
+}
+
+.class-bases {
+  font-size: 10px;
+  color: #6b7280;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+.class-section {
+  border-top: 1px solid #e5e7eb;
+  padding: 8px 12px;
+  background: white;
+}
+
+.class-section:last-child {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.class-member {
+  padding: 2px 0;
+  line-height: 1.6;
+  color: #1f2937;
+}
+
+.visibility {
+  color: #059669;
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+.member-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+.member-type {
+  color: #3b82f6;
+  margin-left: 2px;
+}
+
+.parameters {
+  color: #6b7280;
+}
+
+.default-value {
+  color: #dc2626;
+  font-size: 11px;
+}
+
+.modifier {
+  font-size: 10px;
+  color: #7c3aed;
+  font-style: italic;
+}
+
+.handle {
+  width: 8px;
+  height: 8px;
+  background: #3b82f6;
+  border: 2px solid white;
+}
+
+.handle:hover {
+  background: #2563eb;
+}

@@ -2,6 +2,7 @@
   "name": "drait-desktop",
   "version": "0.1.0",
   "description": "DRAIT - Desktop UML Class Diagram Editor",
+  "type": "module",
   "main": "electron/main.js",
   "author": "DRAIT Development Team",
   "license": "MIT",

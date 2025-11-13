@@ -5,9 +5,14 @@
  * and communication with Python backend.
  */
 
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
-const path = require('path');
-const { spawn } = require('child_process');
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import path from 'path';
+import { spawn } from 'child_process';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 let mainWindow = null;
 let pythonProcess = null;
@@ -25,12 +30,12 @@ function createWindow() {
     minWidth: 1000,
     minHeight: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false
     },
-    title: 'DRAIT - UML Class Diagram Editor',
+    title: 'DRAI - UML2 Class Diagram Editor',
     backgroundColor: '#1f2937', // Dark gray background
     show: false // Don't show until ready
   });
@@ -114,8 +119,8 @@ ipcMain.handle('dialog:saveFile', async (event, defaultName, filters) => {
  */
 ipcMain.handle('python:parse', async (event, filePath) => {
   return new Promise((resolve, reject) => {
-    // Use drait-parse CLI (which is already installed)
-    const pythonCmd = spawn('uv', ['run', 'drait-parse', filePath], {
+    // Use drait-parse CLI with JSON output
+    const pythonCmd = spawn('uv', ['run', 'drait-parse', filePath, '--format', 'json'], {
       cwd: path.join(__dirname, '../../../') // Project root
     });
 
@@ -135,16 +140,15 @@ ipcMain.handle('python:parse', async (event, filePath) => {
         reject(new Error(`Python parse failed: ${errorOutput}`));
       } else {
         try {
-          // For now, drait-parse outputs PlantUML
-          // We need to modify it to output JSON instead
-          // TODO: Add --format=json flag to drait-parse
+          // Parse JSON output from drait-parse
+          const metamodel = JSON.parse(output);
           resolve({
             success: true,
-            output: output,
-            message: 'Parsed successfully (PlantUML format - JSON output coming soon)'
+            metamodel: metamodel,
+            message: 'Parsed successfully'
           });
         } catch (error) {
-          reject(error);
+          reject(new Error(`Failed to parse JSON: ${error.message}\nOutput: ${output}`));
         }
       }
     });

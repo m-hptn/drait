@@ -152,7 +152,6 @@ Examples:
         exporter = PlantUMLExporter()
         plantuml_code = exporter.export_project(project)
 
-        # Output
         if args.output:
             output_path = Path(args.output)
             output_path.write_text(plantuml_code)

@@ -10,6 +10,13 @@
   background-color: #111827;
   padding: 1rem 2rem;
   border-bottom: 1px solid #374151;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.app-header > div:first-child {
+  flex: 1;
 }
 
 .app-header h1 {
@@ -25,15 +32,26 @@
   color: #9ca3af;
 }
 
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
 .app-main {
   flex: 1;
-  overflow: auto;
-  padding: 2rem;
+  overflow: hidden;
+  position: relative;
 }
 
 .welcome-section {
   max-width: 800px;
   margin: 0 auto;
+  padding: 2rem;
 }
 
 .welcome-section h2 {
