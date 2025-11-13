@@ -1,0 +1,126 @@
+{
+  "id": "b15063d1-698c-4ad3-9a41-fedbed0af1f2",
+  "name": "SimpleExample",
+  "version": "1.0.0",
+  "packages": [
+    {
+      "id": "2db5bd75-a3a9-4232-b344-6c9c4e233662",
+      "name": "example",
+      "classes": [
+        {
+          "id": "6489a2bc-2e36-45fc-89f2-46c096c49a2a",
+          "name": "Person",
+          "attributes": [
+            {
+              "id": "17fbce67-5a1e-431f-90d2-542630c95d15",
+              "name": "name",
+              "type": {
+                "name": "str",
+                "module": null,
+                "type_arguments": [],
+                "is_optional": false
+              },
+              "visibility": "public",
+              "default_value": null,
+              "is_static": false,
+              "is_readonly": false,
+              "decorators": [],
+              "docstring": "Person's name"
+            },
+            {
+              "id": "9d916b88-f90e-4f7a-8b65-e8f295c812f8",
+              "name": "age",
+              "type": {
+                "name": "int",
+                "module": null,
+                "type_arguments": [],
+                "is_optional": false
+              },
+              "visibility": "public",
+              "default_value": null,
+              "is_static": false,
+              "is_readonly": false,
+              "decorators": [],
+              "docstring": "Person's age"
+            }
+          ],
+          "methods": [
+            {
+              "id": "093e1001-e1f6-4dd1-a5eb-5b02743bd3a9",
+              "name": "__init__",
+              "parameters": [
+                {
+                  "name": "name",
+                  "type": {
+                    "name": "str",
+                    "module": null,
+                    "type_arguments": [],
+                    "is_optional": false
+                  },
+                  "default_value": null,
+                  "kind": "positional"
+                },
+                {
+                  "name": "age",
+                  "type": {
+                    "name": "int",
+                    "module": null,
+                    "type_arguments": [],
+                    "is_optional": false
+                  },
+                  "default_value": null,
+                  "kind": "positional"
+                }
+              ],
+              "return_type": null,
+              "visibility": "public",
+              "is_static": false,
+              "is_class_method": false,
+              "is_abstract": false,
+              "decorators": [],
+              "docstring": "Initialize a new person.",
+              "body": null
+            },
+            {
+              "id": "a38841ae-7f4c-4c27-aea7-1785f4765388",
+              "name": "greet",
+              "parameters": [],
+              "return_type": {
+                "name": "str",
+                "module": null,
+                "type_arguments": [],
+                "is_optional": false
+              },
+              "visibility": "public",
+              "is_static": false,
+              "is_class_method": false,
+              "is_abstract": false,
+              "decorators": [],
+              "docstring": "Return a greeting message.",
+              "body": null
+            }
+          ],
+          "decorators": [],
+          "stereotypes": [],
+          "base_classes": [],
+          "is_abstract": false,
+          "docstring": "Represents a person with basic information.",
+          "position": {
+            "x": 100.0,
+            "y": 100.0,
+            "width": 200.0,
+            "height": 150.0
+          },
+          "metadata": {}
+        }
+      ],
+      "relationships": [],
+      "imports": [],
+      "docstring": "Simple example package"
+    }
+  ],
+  "metadata": {
+    "author": "DRAIT Team",
+    "description": "Simple class diagram example"
+  }
+}
