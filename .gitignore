@@ -56,6 +56,9 @@ celerybeat-schedule
 celerybeat.pid
 *.sage.py
 
+# uv
+uv.lock
+
 # Node.js / Electron
 node_modules/
 npm-debug.log*
