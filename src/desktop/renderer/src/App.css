@@ -1,0 +1,123 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #1f2937;
+  color: #f3f4f6;
+}
+
+.app-header {
+  background-color: #111827;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #374151;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #60a5fa;
+}
+
+.app-header p {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
+.app-main {
+  flex: 1;
+  overflow: auto;
+  padding: 2rem;
+}
+
+.welcome-section {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.welcome-section h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: #f3f4f6;
+}
+
+.welcome-section > p {
+  color: #9ca3af;
+  margin-bottom: 2rem;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.btn-primary:active {
+  background-color: #1d4ed8;
+}
+
+.message {
+  padding: 1rem;
+  background-color: #374151;
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+  color: #d1d5db;
+}
+
+.parsed-content {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #111827;
+  border-radius: 0.375rem;
+  border: 1px solid #374151;
+}
+
+.parsed-content h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #f3f4f6;
+}
+
+.parsed-content pre {
+  background-color: #0f172a;
+  padding: 1rem;
+  border-radius: 0.25rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #e5e7eb;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.info {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #374151;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.info p {
+  margin: 0.25rem 0;
+}
