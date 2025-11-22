@@ -87,7 +87,7 @@ function stopPythonBackend() {
 /**
  * Handle file open dialog
  */
-ipcMain.handle('dialog:openFile', async (event, filters) => {
+ipcMain.handle('dialog:openFile', async (_event, filters) => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ['openFile'],
     filters: filters || [
@@ -100,9 +100,25 @@ ipcMain.handle('dialog:openFile', async (event, filters) => {
 });
 
 /**
+ * Handle folder open dialog
+ */
+ipcMain.handle('dialog:openFolder', async (_event) => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openDirectory']
+  });
+
+  if (result.canceled) {
+    return undefined;
+  }
+
+  console.log('Selected folder:', result.filePaths[0]);
+  return result.filePaths[0]; // Return selected folder
+});
+
+/**
  * Handle save file dialog
  */
-ipcMain.handle('dialog:saveFile', async (event, defaultName, filters) => {
+ipcMain.handle('dialog:saveFile', async (_event, defaultName, filters) => {
   const result = await dialog.showSaveDialog(mainWindow, {
     defaultPath: defaultName,
     filters: filters || [
@@ -117,7 +133,7 @@ ipcMain.handle('dialog:saveFile', async (event, defaultName, filters) => {
 /**
  * Parse Python file and return metamodel JSON
  */
-ipcMain.handle('python:parse', async (event, filePath) => {
+ipcMain.handle('python:parse', async (_event, filePath) => {
   return new Promise((resolve, reject) => {
     // Use drait-parse CLI with JSON output
     const pythonCmd = spawn('uv', ['run', 'drait-parse', filePath, '--format', 'json'], {
@@ -156,9 +172,57 @@ ipcMain.handle('python:parse', async (event, filePath) => {
 });
 
 /**
+ * Parse Python folder and return merged metamodel JSON
+ */
+ipcMain.handle('python:parseFolder', async (_event, folderPath) => {
+  console.log('Parsing folder:', folderPath);
+
+  return new Promise((resolve, reject) => {
+    // Use drait-parse CLI with folder path and JSON output
+    const pythonCmd = spawn('uv', ['run', 'drait-parse', folderPath, '--format', 'json'], {
+      cwd: path.join(__dirname, '../../../') // Project root
+    });
+
+    let output = '';
+    let errorOutput = '';
+
+    pythonCmd.stdout.on('data', (data) => {
+      output += data.toString();
+    });
+
+    pythonCmd.stderr.on('data', (data) => {
+      errorOutput += data.toString();
+      console.error('Python stderr:', data.toString());
+    });
+
+    pythonCmd.on('close', (code) => {
+      console.log('Python parse exit code:', code);
+      if (code !== 0) {
+        console.error('Parse failed:', errorOutput);
+        reject(new Error(`Python parse failed: ${errorOutput}`));
+      } else {
+        try {
+          // Parse JSON output from drait-parse
+          const metamodel = JSON.parse(output);
+          console.log('Successfully parsed folder, found', metamodel.packages[0].classes.length, 'classes');
+          resolve({
+            success: true,
+            metamodel: metamodel,
+            message: 'Parsed successfully'
+          });
+        } catch (error) {
+          console.error('JSON parse failed:', error);
+          reject(new Error(`Failed to parse JSON: ${error.message}\nOutput: ${output}`));
+        }
+      }
+    });
+  });
+});
+
+/**
  * Generate Python code from metamodel JSON
  */
-ipcMain.handle('python:generate', async (event, metamodelJson) => {
+ipcMain.handle('python:generate', async (_event, _metamodelJson) => {
   // TODO: Implement code generation
   // Will call Python generator when it's built
   return {

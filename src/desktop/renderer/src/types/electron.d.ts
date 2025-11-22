@@ -5,11 +5,13 @@
 export interface ElectronAPI {
   dialog: {
     openFile: (filters?: FileFilter[]) => Promise<string | undefined>;
+    openFolder: () => Promise<string | undefined>;
     saveFile: (defaultName?: string, filters?: FileFilter[]) => Promise<string | undefined>;
   };
 
   python: {
     parse: (filePath: string) => Promise<ParseResult>;
+    parseFolder: (folderPath: string) => Promise<ParseResult>;
     generate: (metamodel: any) => Promise<GenerateResult>;
   };
 

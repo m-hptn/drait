@@ -8,6 +8,20 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
+.class-source-file {
+  background: #eff6ff;
+  border-bottom: 1px solid #bfdbfe;
+  padding: 4px 8px;
+  font-size: 10px;
+  color: #1e40af;
+  font-family: 'Monaco', 'Courier New', monospace;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+}
+
 .class-header {
   background: #f3f4f6;
   padding: 8px 12px;

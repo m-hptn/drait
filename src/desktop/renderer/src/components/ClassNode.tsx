@@ -11,11 +11,21 @@ interface ClassNodeProps {
 function ClassNode({ data }: ClassNodeProps) {
   const { classData } = data;
 
+  // Get source file from metadata
+  const sourceFile = classData.metadata?.source_file as string | undefined;
+
   return (
     <div className="class-node">
       {/* Connection handles */}
       <Handle type="target" position={Position.Top} className="handle" />
       <Handle type="source" position={Position.Bottom} className="handle" />
+
+      {/* Source file indicator */}
+      {sourceFile && (
+        <div className="class-source-file" title={sourceFile}>
+          📄 {sourceFile}
+        </div>
+      )}
 
       {/* Class name section */}
       <div className="class-header">

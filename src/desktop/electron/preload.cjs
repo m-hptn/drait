@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld('electron', {
   // File dialog operations
   dialog: {
     openFile: (filters) => ipcRenderer.invoke('dialog:openFile', filters),
+    openFolder: () => ipcRenderer.invoke('dialog:openFolder'),
     saveFile: (defaultName, filters) => ipcRenderer.invoke('dialog:saveFile', defaultName, filters)
   },
 
@@ -29,6 +30,13 @@ contextBridge.exposeInMainWorld('electron', {
      * @returns {Promise<Object>} Metamodel JSON
      */
     parse: (filePath) => ipcRenderer.invoke('python:parse', filePath),
+
+    /**
+     * Parse a Python folder/project and get merged metamodel JSON
+     * @param {string} folderPath - Path to folder containing Python files
+     * @returns {Promise<Object>} Metamodel JSON
+     */
+    parseFolder: (folderPath) => ipcRenderer.invoke('python:parseFolder', folderPath),
 
     /**
      * Generate Python code from metamodel
