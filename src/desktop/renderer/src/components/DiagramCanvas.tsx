@@ -13,7 +13,9 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 
 import ClassNode from './ClassNode';
+import PackageNode from './PackageNode';
 import './ClassNode.css';
+import './PackageNode.css';
 import { Project } from '../types/metamodel';
 import { projectToFlow } from '../utils/metamodelToFlow';
 
@@ -22,7 +24,8 @@ interface DiagramCanvasProps {
 }
 
 const nodeTypes = {
-  classNode: ClassNode
+  classNode: ClassNode,
+  packageNode: PackageNode
 };
 
 export default function DiagramCanvas({ project }: DiagramCanvasProps) {
@@ -71,7 +74,9 @@ export default function DiagramCanvas({ project }: DiagramCanvasProps) {
               <>
                 <br />
                 <span style={{ color: '#6b7280' }}>
-                  {project.packages[0].classes.length} classes, {project.packages[0].relationships.length} relationships
+                  {project.packages.length} package{project.packages.length !== 1 ? 's' : ''},{' '}
+                  {project.packages.reduce((sum, pkg) => sum + pkg.classes.length, 0)} classes,{' '}
+                  {project.packages.reduce((sum, pkg) => sum + pkg.relationships.length, 0)} relationships
                 </span>
               </>
             )}
