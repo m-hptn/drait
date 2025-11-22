@@ -27,7 +27,7 @@ from .metamodel import (
 )
 
 # Parser
-from .parsers.python_parser import PythonParser, parse_file_to_project
+from .parsers.python_parser import PythonParser, parse_file_to_project, parse_folder_to_project
 
 # Exporters
 from .exporters.plantuml import PlantUMLExporter
@@ -52,6 +52,7 @@ __all__ = [
     # Parser
     "PythonParser",
     "parse_file_to_project",
+    "parse_folder_to_project",
     # Exporters
     "PlantUMLExporter",
 ]

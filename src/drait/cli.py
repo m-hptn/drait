@@ -9,7 +9,7 @@ import argparse
 from pathlib import Path
 from typing import Optional
 
-from drait.parsers.python_parser import parse_file_to_project
+from drait.parsers.python_parser import parse_file_to_project, parse_folder_to_project
 from drait.exporters.plantuml import PlantUMLExporter
 
 
@@ -42,9 +42,9 @@ Examples:
     )
 
     parser.add_argument(
-        "input_file",
+        "input_path",
         type=str,
-        help="Python source file to parse"
+        help="Python source file or folder to parse"
     )
 
     parser.add_argument(
@@ -56,7 +56,7 @@ Examples:
     parser.add_argument(
         "-n", "--name",
         type=str,
-        help="Project name for diagram title (default: filename)"
+        help="Project name for diagram title (default: filename/folder name)"
     )
 
     parser.add_argument(
@@ -71,40 +71,60 @@ Examples:
         help="Exclude relationships from diagram"
     )
 
+    parser.add_argument(
+        "-f", "--format",
+        type=str,
+        choices=["plantuml", "json"],
+        default="plantuml",
+        help="Output format: plantuml or json (default: plantuml)"
+    )
+
     args = parser.parse_args()
 
-    # Check if input file exists
-    input_path = Path(args.input_file)
+    # Check if input path exists
+    input_path = Path(args.input_path)
     if not input_path.exists():
-        print(f"Error: File not found: {args.input_file}", file=sys.stderr)
+        print(f"Error: Path not found: {args.input_path}", file=sys.stderr)
         sys.exit(1)
 
-    if not input_path.is_file():
-        print(f"Error: Not a file: {args.input_file}", file=sys.stderr)
-        sys.exit(1)
-
-    # Parse the file
+    # Parse file or folder
     try:
-        project = parse_file_to_project(str(input_path), args.name)
+        if input_path.is_file():
+            # Single file
+            project = parse_file_to_project(str(input_path), args.name)
+        elif input_path.is_dir():
+            # Folder - parse all .py files with nested package structure
+            project = parse_folder_to_project(str(input_path), args.name)
+        else:
+            print(f"Error: Invalid path: {args.input_path}", file=sys.stderr)
+            sys.exit(1)
     except Exception as e:
-        print(f"Error parsing file: {e}", file=sys.stderr)
+        print(f"Error parsing: {e}", file=sys.stderr)
         sys.exit(1)
 
     # Show statistics if requested
     if args.stats:
-        package = project.packages[0]
         print(f"Project: {project.name}")
-        print(f"Package: {package.name}")
-        print(f"Classes: {len(package.classes)}")
-        print(f"Relationships: {len(package.relationships)}")
+        print(f"Packages: {len(project.packages)}")
+
+        for pkg in project.packages:
+            pkg_display = f'"{pkg.name}"' if pkg.name else "(root)"
+            print(f"\nPackage {pkg_display}:")
+            print(f"  Classes: {len(pkg.classes)}")
+            print(f"  Relationships: {len(pkg.relationships)}")
+
+        total_classes = sum(len(pkg.classes) for pkg in project.packages)
+        total_relationships = sum(len(pkg.relationships) for pkg in project.packages)
+        print(f"\nTotal: {total_classes} classes, {total_relationships} relationships")
         print()
 
-        # Count features
-        abstract_classes = sum(1 for cls in package.classes if cls.is_abstract)
-        dataclasses = sum(1 for cls in package.classes
+        # Count features across all packages
+        all_classes = [cls for pkg in project.packages for cls in pkg.classes]
+        abstract_classes = sum(1 for cls in all_classes if cls.is_abstract)
+        dataclasses = sum(1 for cls in all_classes
                          if any(d.name == "dataclass" for d in cls.decorators))
-        total_methods = sum(len(cls.methods) for cls in package.classes)
-        abstract_methods = sum(1 for cls in package.classes
+        total_methods = sum(len(cls.methods) for cls in all_classes)
+        abstract_methods = sum(1 for cls in all_classes
                               for m in cls.methods if m.is_abstract)
 
         print("Features:")
@@ -114,17 +134,31 @@ Examples:
         print(f"  Abstract methods: {abstract_methods}")
         print()
 
-    # Export to PlantUML
-    exporter = PlantUMLExporter()
-    plantuml_code = exporter.export_project(project)
+    # Export based on format
+    if args.format == "json":
+        # Export as JSON
+        import json
+        output_data = project.to_dict()
+        output_text = json.dumps(output_data, indent=2)
 
-    # Output
-    if args.output:
-        output_path = Path(args.output)
-        output_path.write_text(plantuml_code)
-        print(f"PlantUML diagram written to: {args.output}")
+        if args.output:
+            output_path = Path(args.output)
+            output_path.write_text(output_text)
+            print(f"JSON model written to: {args.output}")
+        else:
+            print(output_text)
     else:
-        print(plantuml_code)
+        # Export to PlantUML (default)
+        exporter = PlantUMLExporter()
+        plantuml_code = exporter.export_project(project)
+
+        # Output
+        if args.output:
+            output_path = Path(args.output)
+            output_path.write_text(plantuml_code)
+            print(f"PlantUML diagram written to: {args.output}")
+        else:
+            print(plantuml_code)
 
 
 def export_command():

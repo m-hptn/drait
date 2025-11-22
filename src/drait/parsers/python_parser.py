@@ -905,3 +905,114 @@ def parse_file_to_project(file_path: str, project_name: Optional[str] = None) ->
     )
 
     return project
+
+
+def parse_folder_to_project(folder_path: str, project_name: Optional[str] = None) -> Project:
+    """
+    Parse all Python files in a folder to a Project with nested package structure.
+
+    Creates one Package per directory, with nested directories represented using
+    dot notation (e.g., "services.auth" for services/auth/).
+
+    Args:
+        folder_path: Path to folder containing Python files
+        project_name: Optional project name (defaults to folder name)
+
+    Returns:
+        Project containing multiple packages based on directory structure
+
+    Example:
+        For folder structure:
+            myproject/
+                models.py
+                services/
+                    auth.py
+                    user.py
+                utils/
+                    helpers.py
+
+        Creates packages:
+            - "" (root): classes from models.py
+            - "services": classes from services/*.py
+            - "utils": classes from utils/*.py
+    """
+    folder = Path(folder_path)
+
+    if not folder.is_dir():
+        raise ValueError(f"Not a directory: {folder_path}")
+
+    # Find all .py files recursively
+    py_files = sorted(folder.rglob("*.py"))
+
+    if not py_files:
+        raise ValueError(f"No Python files found in: {folder_path}")
+
+    # Group files by their parent directory
+    from collections import defaultdict
+    files_by_package = defaultdict(list)
+
+    for py_file in py_files:
+        # Get relative path from folder root
+        relative_path = py_file.relative_to(folder)
+
+        # Determine package name from directory structure
+        if relative_path.parent == Path('.'):
+            # File in root directory
+            package_name = ""
+        else:
+            # File in subdirectory - use dot notation
+            package_name = str(relative_path.parent).replace('/', '.').replace('\\', '.')
+
+        files_by_package[package_name].append(py_file)
+
+    # Parse each package's files
+    packages = []
+    parser = PythonParser()
+
+    for package_name, files in sorted(files_by_package.items()):
+        package_classes = []
+        package_relationships = []
+
+        for py_file in files:
+            try:
+                file_package = parser.parse_file(str(py_file))
+
+                # Add source file metadata to each class
+                relative_path = py_file.relative_to(folder)
+                for cls in file_package.classes:
+                    cls.metadata["source_file"] = str(relative_path)
+                    cls.metadata["source_file_absolute"] = str(py_file)
+
+                package_classes.extend(file_package.classes)
+                package_relationships.extend(file_package.relationships)
+            except Exception as e:
+                # Skip files that fail to parse (e.g., syntax errors)
+                print(f"Warning: Skipping {py_file}: {e}", file=sys.stderr)
+                continue
+
+        # Only create package if it has classes
+        if package_classes:
+            # Use root package name or directory-based name
+            display_name = package_name if package_name else Path(folder_path).name
+
+            package = Package(
+                name=package_name if package_name else display_name,
+                classes=package_classes,
+                relationships=package_relationships,
+                docstring=f"Package from {len(files)} Python file(s)"
+            )
+            packages.append(package)
+
+    if not packages:
+        raise ValueError(f"No classes found in Python files in: {folder_path}")
+
+    # Create project
+    if project_name is None:
+        project_name = folder.name
+
+    project = Project(
+        name=project_name,
+        packages=packages,
+    )
+
+    return project
