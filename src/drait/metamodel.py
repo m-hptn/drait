@@ -8,7 +8,16 @@ and their mapping to Python code.
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from uuid import UUID, uuid4
+from uuid import UUID, uuid4, uuid5, NAMESPACE_DNS
+
+
+# Helper function to generate deterministic UUIDs
+def generate_deterministic_uuid(name: str, namespace_str: str = "drait") -> UUID:
+    """
+    Generate a deterministic UUID based on a name and namespace.
+    This ensures the same name always produces the same UUID.
+    """
+    return uuid5(NAMESPACE_DNS, f"{namespace_str}:{name}")
 
 
 # Enumerations
@@ -302,7 +311,7 @@ class Method:
 class Class:
     """Represents a Python class with attributes, methods, and metadata."""
     name: str
-    id: UUID = field(default_factory=uuid4)
+    id: UUID = field(default_factory=uuid4)  # Will be overridden in __post_init__
     attributes: List[Attribute] = field(default_factory=list)
     methods: List[Method] = field(default_factory=list)
     decorators: List[Decorator] = field(default_factory=list)
@@ -312,6 +321,13 @@ class Class:
     docstring: Optional[str] = None
     position: Optional[Position] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self):
+        """Generate deterministic ID based on class name and source file."""
+        # Use source file path if available for more uniqueness
+        source_file = self.metadata.get("source_file", "")
+        namespace = f"{source_file}:{self.name}" if source_file else self.name
+        self.id = generate_deterministic_uuid(namespace)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""

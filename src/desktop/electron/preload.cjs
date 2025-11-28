@@ -1,0 +1,75 @@
+/**
+ * Electron Preload Script
+ *
+ * This script runs in the renderer process before the React app loads.
+ * It exposes a safe API for the React app to communicate with Electron.
+ *
+ * Security: Uses contextBridge to expose only specific functions,
+ * preventing the React app from accessing all of Node.js APIs.
+ *
+ * NOTE: Preload scripts must use CommonJS (require) because Electron
+ * does not yet support ESM in preload context.
+ */
+
+const { contextBridge, ipcRenderer } = require('electron');
+
+// Expose safe API to renderer process (React app)
+contextBridge.exposeInMainWorld('electron', {
+  // File dialog operations
+  dialog: {
+    openFile: (filters) => ipcRenderer.invoke('dialog:openFile', filters),
+    openFolder: () => ipcRenderer.invoke('dialog:openFolder'),
+    saveFile: (defaultName, filters) => ipcRenderer.invoke('dialog:saveFile', defaultName, filters)
+  },
+
+  // Python backend operations
+  python: {
+    /**
+     * Parse a Python file and get metamodel JSON
+     * @param {string} filePath - Path to Python file
+     * @returns {Promise<Object>} Metamodel JSON
+     */
+    parse: (filePath) => ipcRenderer.invoke('python:parse', filePath),
+
+    /**
+     * Parse a Python folder/project and get merged metamodel JSON
+     * @param {string} folderPath - Path to folder containing Python files
+     * @returns {Promise<Object>} Metamodel JSON
+     */
+    parseFolder: (folderPath) => ipcRenderer.invoke('python:parseFolder', folderPath),
+
+    /**
+     * Generate Python code from metamodel
+     * @param {Object} metamodel - Metamodel JSON object
+     * @returns {Promise<string>} Generated Python code
+     */
+    generate: (metamodel) => ipcRenderer.invoke('python:generate', metamodel)
+  },
+
+  // Layout persistence operations
+  layout: {
+    /**
+     * Save diagram layout to disk
+     * @param {string} projectPath - Path to the source folder
+     * @param {Object} layoutData - Layout data to save
+     * @returns {Promise<Object>} Save result
+     */
+    save: (projectPath, layoutData) => ipcRenderer.invoke('layout:save', projectPath, layoutData),
+
+    /**
+     * Load diagram layout from disk
+     * @param {string} projectPath - Path to the source folder
+     * @returns {Promise<Object>} Load result with layout data
+     */
+    load: (projectPath) => ipcRenderer.invoke('layout:load', projectPath)
+  },
+
+  // Platform information
+  platform: process.platform,
+
+  // Environment
+  isDev: process.env.NODE_ENV === 'development'
+});
+
+// Log that preload script has loaded
+console.log('Preload script loaded successfully');

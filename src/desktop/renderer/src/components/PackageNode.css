@@ -1,0 +1,34 @@
+.package-node {
+  background: rgba(239, 246, 255, 0.3);
+  border: 2px dashed #93c5fd;
+  border-radius: 8px;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: all;
+}
+
+.package-header {
+  background: rgba(219, 234, 254, 0.8);
+  border-bottom: 1px solid #93c5fd;
+  padding: 8px 16px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  cursor: move;
+  user-select: none;
+}
+
+.package-name {
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e40af;
+  margin-bottom: 2px;
+}
+
+.package-info {
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 11px;
+  color: #3b82f6;
+  font-style: italic;
+}

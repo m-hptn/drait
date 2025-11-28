@@ -1,7 +1,9 @@
 [[section-runtime-view]]
 == Runtime View
 
-=== Scenario 1: User Creates Class Diagram and Generates Code
+NOTE: The scenarios described in this section represent the target architecture. Currently, only Scenario 2 (code-to-diagram, reverse engineering) is fully implemented via the desktop application. Scenarios 1 and 3 (code generation and synchronization) are planned for future releases.
+
+=== Scenario 1: User Creates Class Diagram and Generates Code 🚧 (Planned)
 
 [plantuml, create-diagram-flow, svg]
 ----
@@ -62,7 +64,7 @@ deactivate DE
 . File system manager writes generated code to .py file
 . User sees generated code in code viewer
 
-=== Scenario 2: User Modifies Python Code and Diagram Updates
+=== Scenario 2: User Imports Python Code and Views Diagram ✅ (Implemented)
 
 [plantuml, modify-code-flow, svg]
 ----
@@ -133,7 +135,7 @@ deactivate FSW
 . Diagram editor re-renders visual representation
 . User sees updated diagram reflecting code changes
 
-=== Scenario 3: Conflict Resolution
+=== Scenario 3: Conflict Resolution 🚧 (Planned)
 
 [plantuml, conflict-resolution, svg]
 ----
