@@ -46,6 +46,24 @@ contextBridge.exposeInMainWorld('electron', {
     generate: (metamodel) => ipcRenderer.invoke('python:generate', metamodel)
   },
 
+  // Layout persistence operations
+  layout: {
+    /**
+     * Save diagram layout to disk
+     * @param {string} projectPath - Path to the source folder
+     * @param {Object} layoutData - Layout data to save
+     * @returns {Promise<Object>} Save result
+     */
+    save: (projectPath, layoutData) => ipcRenderer.invoke('layout:save', projectPath, layoutData),
+
+    /**
+     * Load diagram layout from disk
+     * @param {string} projectPath - Path to the source folder
+     * @returns {Promise<Object>} Load result with layout data
+     */
+    load: (projectPath) => ipcRenderer.invoke('layout:load', projectPath)
+  },
+
   // Platform information
   platform: process.platform,
 

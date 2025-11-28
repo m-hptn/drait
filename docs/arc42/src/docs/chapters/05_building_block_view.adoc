@@ -1,6 +1,8 @@
 [[section-building-block-view]]
 == Building Block View
 
+NOTE: This section describes the target architecture for the complete system. Currently implemented components are marked with ✅. Components under development or planned are marked with 🚧.
+
 === Whitebox Overall System
 
 [plantuml, system-overview, svg]
@@ -54,26 +56,30 @@ CS --> FSM
 
 **Contained Building Blocks:**
 
-[cols="1,3" options="header"]
+[cols="1,3,1" options="header"]
 |===
-| Component | Responsibility
+| Component | Responsibility | Status
 
 | UI Layer
 | User interaction, visual diagram editing, code display and editing
+| 🚧 Partially implemented (viewer complete, editor planned)
 
 | Core Layer
 | Business logic, model management, synchronization coordination
+| 🚧 Partially implemented (metamodel complete, sync engine planned)
 
 | Transformation Layer
 | Bidirectional transformations between diagram and code representations
+| 🚧 Partially implemented (parser ✅, generator planned)
 
 | Storage Layer
 | Persistence, file I/O, serialization/deserialization
+| ✅ Implemented (JSON serialization, layout persistence)
 |===
 
 === Level 2: Core Layer Components
 
-==== Synchronization Engine
+==== Synchronization Engine 🚧 (Planned)
 
 **Purpose/Responsibility:**
 
@@ -96,7 +102,7 @@ CS --> FSM
 * Reliability: Transactional updates with rollback on failure
 * Maintainability: Event-driven architecture allows easy extension
 
-==== Diagram Model Manager
+==== Diagram Model Manager ✅ (Implemented)
 
 **Purpose/Responsibility:**
 
@@ -120,7 +126,7 @@ CS --> FSM
 * Method: Name, parameters, return type, visibility
 * Relationship: Association, aggregation, composition, inheritance
 
-==== Code Model Manager
+==== Code Model Manager ✅ (Implemented)
 
 **Purpose/Responsibility:**
 
@@ -138,7 +144,7 @@ CS --> FSM
 
 === Level 2: Transformation Layer Components
 
-==== Code Generator
+==== Code Generator 🚧 (Planned)
 
 **Purpose/Responsibility:**
 
@@ -159,7 +165,7 @@ CS --> FSM
 * Includes type hints for Python 3.8+
 * Preserves existing method implementations
 
-==== Code Parser
+==== Code Parser ✅ (Implemented)
 
 **Purpose/Responsibility:**
 
@@ -174,7 +180,7 @@ CS --> FSM
 * `extract_classes(ast_tree)`: Extract class definitions
 * `infer_relationships(code_model)`: Detect class relationships
 
-==== Diagram Builder
+==== Diagram Builder ✅ (Implemented)
 
 **Purpose/Responsibility:**
 

@@ -941,8 +941,20 @@ def parse_folder_to_project(folder_path: str, project_name: Optional[str] = None
     if not folder.is_dir():
         raise ValueError(f"Not a directory: {folder_path}")
 
-    # Find all .py files recursively
-    py_files = sorted(folder.rglob("*.py"))
+    # Directories to exclude from parsing
+    EXCLUDED_DIRS = {
+        '.venv', 'venv', '__pycache__', '.git',
+        'node_modules', '.tox', 'build', 'dist',
+        '.eggs', '*.egg-info', '.pytest_cache',
+        '.mypy_cache', '.ruff_cache'
+    }
+
+    # Find all .py files recursively, excluding common directories
+    all_py_files = folder.rglob("*.py")
+    py_files = sorted([
+        f for f in all_py_files
+        if not any(excluded in f.parts for excluded in EXCLUDED_DIRS)
+    ])
 
     if not py_files:
         raise ValueError(f"No Python files found in: {folder_path}")

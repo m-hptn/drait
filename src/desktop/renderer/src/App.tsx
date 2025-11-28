@@ -9,6 +9,7 @@ const MAX_CLASSES_LIMIT = 100;
 function App() {
   const [message, setMessage] = useState('');
   const [project, setProject] = useState<Project | null>(null);
+  const [projectPath, setProjectPath] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleOpenFile = async () => {
@@ -46,6 +47,7 @@ function App() {
       if (folderPath) {
         setIsLoading(true);
         setMessage(`Parsing folder: ${folderPath}...`);
+        setProjectPath(folderPath);
 
         // Parse the Python folder
         const result = await window.electron.python.parseFolder(folderPath);
@@ -125,7 +127,7 @@ function App() {
             )}
           </div>
         ) : project ? (
-          <DiagramCanvas project={project} />
+          <DiagramCanvas project={project} projectPath={projectPath} />
         ) : (
           <div className="welcome-section">
             <h2>Welcome to DRAIT Desktop</h2>

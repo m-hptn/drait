@@ -15,6 +15,11 @@ export interface ElectronAPI {
     generate: (metamodel: any) => Promise<GenerateResult>;
   };
 
+  layout: {
+    save: (projectPath: string, layoutData: any) => Promise<LayoutResult>;
+    load: (projectPath: string) => Promise<LayoutLoadResult>;
+  };
+
   platform: string;
   isDev: boolean;
 }
@@ -36,6 +41,18 @@ export interface GenerateResult {
   success: boolean;
   code?: string;
   message?: string;
+  error?: string;
+}
+
+export interface LayoutResult {
+  success: boolean;
+  path?: string;
+  error?: string;
+}
+
+export interface LayoutLoadResult {
+  success: boolean;
+  layout?: any;
   error?: string;
 }
 

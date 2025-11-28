@@ -3,6 +3,41 @@
 
 This document describes the architecture of a Model-Driven Development Tool that enables software developers and architects to seamlessly work with visual class diagrams and auto-generated code with real-time bidirectional synchronization.
 
+NOTE: This architecture document describes the **target architecture** for the complete system. See the Implementation Status section below for the current state of development.
+
+=== Implementation Status
+
+The project is under active development. The following components are currently implemented:
+
+*Completed:*
+
+* ✅ *Core Metamodel* - Complete UML class diagram representation with JSON serialization
+* ✅ *Python AST Parser* - Full code-to-model transformation including:
+  - Class, attribute, and method extraction with visibility detection
+  - Advanced type annotations (generics, Optional, Union)
+  - Automatic relationship inference (inheritance, composition, aggregation, dependencies)
+  - Support for abstract classes, decorators, properties, dataclasses, and protocols
+  - Virtual environment exclusion (.venv, venv, etc.)
+  - Deterministic UUID generation for persistent node identification
+* ✅ *PlantUML Exporter* - Export metamodel to PlantUML diagrams
+* ✅ *Desktop Application* (Electron + React + TypeScript):
+  - Interactive diagram viewer with React Flow
+  - Package visualization with resizable containers
+  - Drag-and-drop node positioning
+  - Layout persistence with auto-save (stored in `~/.drait/layouts/`)
+  - File and folder import via IPC
+  - Cross-platform support (Windows, macOS, Linux)
+
+*In Progress / Planned:*
+
+* 🚧 *Code Generator* - Template-based Python code generation from metamodel (planned)
+* 🚧 *Diagram Editor* - Add/remove/modify classes in UI (currently view-only)
+* 🚧 *Synchronization Engine* - Bidirectional real-time sync (planned)
+* 🚧 *File System Watchers* - Automatic change detection (planned)
+* 🚧 *Conflict Resolution* - Handling simultaneous changes (planned)
+
+The current implementation focuses on **reverse engineering** (code → diagram visualization) with interactive layout management. The full bidirectional synchronization described in this document represents the target architecture.
+
 === Requirements Overview
 
 The system provides the following key capabilities:

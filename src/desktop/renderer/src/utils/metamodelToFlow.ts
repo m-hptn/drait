@@ -7,6 +7,8 @@ import { Project, Package, Class, RelationshipType } from '../types/metamodel';
 
 const GRID_WIDTH = 300;
 const GRID_HEIGHT = 400;
+const PACKAGE_PADDING = 60; // Space inside package for classes
+const PACKAGE_HEADER_HEIGHT = 50; // Height of package header
 
 export interface FlowData {
   nodes: Node[];
@@ -187,9 +189,7 @@ function calculatePackageLayout(packages: Package[]): {
   const packagePositions = new Map<string, { x: number; y: number; width: number; height: number }>();
   const classPositions = new Map<string, { x: number; y: number }>();
 
-  const PACKAGE_PADDING = 60; // Space inside package for classes
   const PACKAGE_SPACING = 50; // Space between packages
-  const PACKAGE_HEADER_HEIGHT = 50; // Height of package header
 
   let currentX = 50;
   let currentY = 50;
@@ -252,12 +252,7 @@ export function projectToFlow(project: Project): FlowData {
     return { nodes: [], edges: [] };
   }
 
-  // If only one package, use simple layout without package containers
-  if (project.packages.length === 1) {
-    return packageToFlow(project.packages[0]);
-  }
-
-  // Multiple packages - create package containers and position classes within them
+  // Always use package layout (even for single package) to enable consistent save/load
   const { packagePositions, classPositions } = calculatePackageLayout(project.packages);
 
   const nodes: Node[] = [];
@@ -267,6 +262,9 @@ export function projectToFlow(project: Project): FlowData {
   project.packages.forEach((pkg) => {
     const pkgPos = packagePositions.get(pkg.name);
     if (!pkgPos) return;
+
+    // Skip packages with no classes
+    if (pkg.classes.length === 0) return;
 
     // Calculate actual minimum dimensions needed for classes
     const classPositionsInPackage = pkg.classes.map(cls => classPositions.get(cls.id)!);
@@ -287,8 +285,8 @@ export function projectToFlow(project: Project): FlowData {
         minHeight: minHeight
       },
       style: {
-        width: pkgPos.width,
-        height: pkgPos.height,
+        width: minWidth,
+        height: minHeight,
         zIndex: -1
       },
       draggable: true,

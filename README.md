@@ -14,7 +14,7 @@ A Model-Driven Development (MDD) tool that enables software developers and archi
 
 ## Status
 
-🚧 **Active Development** - Core metamodel and Python parser are complete. Working on code generation next.
+🚧 **Active Development** - Core metamodel, Python parser, and desktop application are complete. Working on code generation next.
 
 ### Completed Features
 
@@ -23,6 +23,7 @@ A Model-Driven Development (MDD) tool that enables software developers and archi
 - Support for classes, attributes, methods, parameters, relationships
 - Advanced type references with generics support
 - JSON serialization for git-friendly storage
+- Deterministic UUID generation for persistent layouts
 
 ✅ **Python AST Parser** ([src/drait/parsers/python_parser.py](src/drait/parsers/python_parser.py))
 - **Phase 1**: Extract classes, attributes, methods with visibility detection
@@ -38,6 +39,16 @@ A Model-Driven Development (MDD) tool that enables software developers and archi
   - Properties with getter/setter/deleter
   - Dataclasses with arguments and field metadata
   - Protocol classes (typing.Protocol)
+- Automatic virtual environment exclusion (.venv, venv, etc.)
+
+✅ **Desktop Application** ([src/desktop/](src/desktop/))
+- Electron + React + TypeScript application
+- Interactive UML class diagram visualization with React Flow
+- Package grouping with resizable containers
+- Drag-and-drop node positioning
+- Layout persistence with auto-save
+- File and folder import
+- Cross-platform support (Windows, macOS, Linux)
 
 ✅ **PlantUML Exporter** ([src/drait/exporters/plantuml.py](src/drait/exporters/plantuml.py))
 - Export metamodel to PlantUML diagrams
@@ -83,9 +94,32 @@ pip install -e ".[dev]"
 
 ## Quick Start
 
+### Desktop Application (Recommended)
+
+The easiest way to use DRAIT is through the desktop application:
+
+```bash
+# Navigate to the desktop app directory
+cd src/desktop
+
+# Install dependencies (first time only)
+npm install
+
+# Run the application
+npm run dev
+```
+
+This launches the interactive diagram viewer where you can:
+- Import Python files or folders
+- View interactive UML class diagrams
+- Arrange classes and packages visually
+- Automatically save and restore your custom layouts
+
+See the [Desktop Application README](src/desktop/README.md) for more details.
+
 ### Command-Line Usage
 
-After installation, you can use the `drait-parse` command to parse Python files and generate UML diagrams:
+You can also use the `drait-parse` command to parse Python files and generate PlantUML diagrams:
 
 ```bash
 # With uv (recommended)
@@ -96,6 +130,9 @@ drait-parse mycode.py
 
 # Save diagram to file
 uv run drait-parse mycode.py -o diagram.puml
+
+# Parse entire folder (excludes .venv automatically)
+uv run drait-parse /path/to/project --format json
 
 # Parse with custom project name
 uv run drait-parse mycode.py --name "My Project" -o diagram.puml
@@ -182,22 +219,45 @@ xdg-open build/html5/arc42.html
 ```
 drait/
 ├── docs/
-│   └── arc42/              # Architecture documentation (arc42 template)
-│       ├── src/docs/       # AsciiDoc source files
-│       └── README.md       # Documentation build instructions
-├── src/                    # Source code (coming soon)
-├── tests/                  # Test suite (coming soon)
+│   ├── arc42/              # Architecture documentation (arc42 template)
+│   │   ├── src/docs/       # AsciiDoc source files
+│   │   └── README.md       # Documentation build instructions
+│   └── design/             # Design documentation
+│       └── metamodel.md    # Metamodel design details
+├── src/
+│   ├── drait/              # Core Python library
+│   │   ├── metamodel.py    # Core metamodel definitions
+│   │   ├── parsers/        # Language parsers
+│   │   │   └── python_parser.py
+│   │   └── exporters/      # Diagram exporters
+│   │       └── plantuml.py
+│   └── desktop/            # Electron desktop application
+│       ├── electron/       # Electron main process
+│       ├── renderer/       # React application
+│       └── README.md       # Desktop app documentation
+├── tests/                  # Test suite
 └── README.md              # This file
 ```
 
-## Technology Stack (Planned)
+## Technology Stack
 
-- **Backend**: Python 3.8+ for code generation and parsing
-- **Frontend**: Electron + React + TypeScript for cross-platform UI
-- **Code Parsing**: Python AST module
-- **Code Generation**: Template-based with Jinja2
-- **Diagram Storage**: JSON format (Git-friendly)
-- **Target Platform**: Desktop application (Windows, macOS, Linux)
+### Python Backend
+- **Python 3.8+**: Core metamodel and parsers
+- **Python AST**: Code parsing and analysis
+- **Dataclasses**: Type-safe metamodel definitions
+- **JSON**: Git-friendly diagram storage
+
+### Desktop Application
+- **Electron**: Cross-platform desktop framework
+- **React 18**: UI library with hooks
+- **TypeScript**: Type-safe frontend development
+- **Vite**: Fast build tool and dev server
+- **React Flow**: Interactive diagram rendering
+- **IPC**: Communication between Electron processes
+
+### Future
+- **Code Generation**: Template-based with Jinja2 (planned)
+- **Synchronization**: File watchers and diff algorithms (planned)
 
 ## Key Design Principles
 
@@ -217,12 +277,17 @@ drait/
   - [x] Phase 2: Advanced type annotations (generics, Optional, Union)
   - [x] Phase 3: Relationship inference (inheritance, composition, aggregation, dependency)
   - [x] Phase 4: Advanced features (ABC, decorators, properties, dataclasses)
+- [x] Desktop application (Electron + React)
+  - [x] Interactive diagram viewer with React Flow
+  - [x] Package visualization and grouping
+  - [x] Drag-and-drop node positioning
+  - [x] Layout persistence with auto-save
+  - [x] File and folder import
 - [ ] Code generator with templates
-- [ ] Interactive diagram viewer (web-based)
-- [ ] Diagram editor UI (React + Canvas/SVG)
+- [ ] Diagram editing (add/remove classes, attributes, methods)
 - [ ] Synchronization engine
 - [ ] Conflict resolution mechanism
-- [ ] Desktop application (Electron)
+- [ ] Export diagrams as images (PNG/SVG)
 - [ ] User documentation
 - [ ] Beta release
 

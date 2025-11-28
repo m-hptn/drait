@@ -5,7 +5,10 @@
  * and communication with Python backend.
  */
 
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+// Electron ESM workaround - use default import
+import electron from 'electron';
+const { app, BrowserWindow, ipcMain, dialog } = electron;
+
 import path from 'path';
 import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
@@ -230,6 +233,86 @@ ipcMain.handle('python:generate', async (_event, _metamodelJson) => {
     code: '# Generated Python code will appear here',
     message: 'Code generator not yet implemented'
   };
+});
+
+/**
+ * Save diagram layout to disk
+ */
+ipcMain.handle('layout:save', async (_event, projectPath, layoutData) => {
+  const fs = await import('fs/promises');
+  const os = await import('os');
+
+  try {
+    // Create layouts directory in user's home directory
+    const layoutsDir = path.join(os.homedir(), '.drait', 'layouts');
+    await fs.mkdir(layoutsDir, { recursive: true });
+
+    // Generate filename from project path
+    const fileName = projectPath
+      .replace(/^\//, '')
+      .replace(/\//g, '-')
+      .replace(/\s+/g, '_')
+      + '.layout.json';
+
+    const layoutPath = path.join(layoutsDir, fileName);
+
+    // Write layout file
+    await fs.writeFile(layoutPath, JSON.stringify(layoutData, null, 2), 'utf-8');
+
+    console.log('Layout saved to:', layoutPath);
+    return {
+      success: true,
+      path: layoutPath
+    };
+  } catch (error) {
+    console.error('Failed to save layout:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+});
+
+/**
+ * Load diagram layout from disk
+ */
+ipcMain.handle('layout:load', async (_event, projectPath) => {
+  const fs = await import('fs/promises');
+  const os = await import('os');
+
+  try {
+    // Generate filename from project path
+    const fileName = projectPath
+      .replace(/^\//, '')
+      .replace(/\//g, '-')
+      .replace(/\s+/g, '_')
+      + '.layout.json';
+
+    const layoutPath = path.join(os.homedir(), '.drait', 'layouts', fileName);
+
+    // Read layout file
+    const data = await fs.readFile(layoutPath, 'utf-8');
+    const layoutData = JSON.parse(data);
+
+    console.log('Layout loaded from:', layoutPath);
+    return {
+      success: true,
+      layout: layoutData
+    };
+  } catch (error) {
+    // File not found is expected for new projects
+    if (error.code === 'ENOENT') {
+      return {
+        success: false,
+        error: 'No saved layout found'
+      };
+    }
+    console.error('Failed to load layout:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
 });
 
 // ============================================================================
