@@ -51,7 +51,7 @@ class TestTypeReference:
     def test_optional_type(self):
         """Test optional type reference."""
         type_ref = TypeReference(name="int", is_optional=True)
-        assert str(type_ref) == "Optional[int]"
+        assert str(type_ref) == "int | None"
 
     @pytest.mark.unit
     def test_generic_type(self):

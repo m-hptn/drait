@@ -242,7 +242,7 @@ drait/
 ## Technology Stack
 
 ### Python Backend
-- **Python 3.8+**: Core metamodel and parsers
+- **Python 3.10+**: Core metamodel and parsers
 - **Python AST**: Code parsing and analysis
 - **Dataclasses**: Type-safe metamodel definitions
 - **JSON**: Git-friendly diagram storage

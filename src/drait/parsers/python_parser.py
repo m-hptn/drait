@@ -7,7 +7,7 @@ Phase 1: Basic class, attribute, and method extraction.
 
 import ast
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import Any
 
 from drait.metamodel import (
     Project,
@@ -94,7 +94,7 @@ class PythonParser:
 
         return package
 
-    def _extract_class(self, node: ast.ClassDef) -> Optional[Class]:
+    def _extract_class(self, node: ast.ClassDef) -> Class | None:
         """
         Extract class information from AST node.
 
@@ -155,7 +155,7 @@ class PythonParser:
 
         return cls
 
-    def _extract_class_attributes(self, node: ast.ClassDef) -> List[Attribute]:
+    def _extract_class_attributes(self, node: ast.ClassDef) -> list[Attribute]:
         """
         Extract class-level attributes (not from __init__).
 
@@ -194,7 +194,7 @@ class PythonParser:
 
         return attributes
 
-    def _extract_init_attributes(self, node: ast.FunctionDef) -> List[Attribute]:
+    def _extract_init_attributes(self, node: ast.FunctionDef) -> list[Attribute]:
         """
         Extract instance attributes from __init__ method.
 
@@ -240,7 +240,7 @@ class PythonParser:
         name: str,
         value_node: ast.expr,
         is_static: bool
-    ) -> Optional[Attribute]:
+    ) -> Attribute | None:
         """Create attribute from simple assignment."""
         # Infer type from value if possible
         type_ref = self._infer_type_from_value(value_node)
@@ -268,9 +268,9 @@ class PythonParser:
         self,
         name: str,
         annotation: ast.expr,
-        value_node: Optional[ast.expr],
+        value_node: ast.expr | None,
         is_static: bool
-    ) -> Optional[Attribute]:
+    ) -> Attribute | None:
         """Create attribute from annotated assignment (with type hint)."""
         # Parse type annotation
         type_ref = self._parse_type_annotation(annotation)
@@ -294,7 +294,7 @@ class PythonParser:
             default_value=default_value,
         )
 
-    def _extract_method(self, node: ast.FunctionDef) -> Optional[Method]:
+    def _extract_method(self, node: ast.FunctionDef) -> Method | None:
         """
         Extract method information from AST node.
 
@@ -350,7 +350,7 @@ class PythonParser:
 
         return method
 
-    def _extract_parameter(self, arg: ast.arg) -> Optional[Parameter]:
+    def _extract_parameter(self, arg: ast.arg) -> Parameter | None:
         """
         Extract parameter information.
 
@@ -376,33 +376,34 @@ class PythonParser:
 
         Phase 2: Advanced support for generics, Optional, Union, etc.
         """
-        if isinstance(annotation, ast.Name):
-            # Simple type like 'str', 'int', 'Any'
-            return TypeReference(name=annotation.id)
+        match annotation:
+            case ast.Name():
+                # Simple type like 'str', 'int', 'Any'
+                return TypeReference(name=annotation.id)
 
-        elif isinstance(annotation, ast.Constant):
-            # String annotation like 'SomeClass'
-            return TypeReference(name=str(annotation.value))
+            case ast.Constant():
+                # String annotation like 'SomeClass'
+                return TypeReference(name=str(annotation.value))
 
-        elif isinstance(annotation, ast.Subscript):
-            # Generic type like List[str], Dict[str, int], Optional[int]
-            return self._parse_subscript_type(annotation)
+            case ast.Subscript():
+                # Generic type like list[str], dict[str, int], Optional[int]
+                return self._parse_subscript_type(annotation)
 
-        elif isinstance(annotation, ast.BinOp) and isinstance(annotation.op, ast.BitOr):
-            # Union type using | operator (Python 3.10+): str | int
-            return self._parse_union_type(annotation)
+            case ast.BinOp(op=ast.BitOr()):
+                # Union type using | operator (Python 3.10+): str | int
+                return self._parse_union_type(annotation)
 
-        elif isinstance(annotation, ast.Attribute):
-            # Qualified type like typing.List, collections.OrderedDict
-            return self._parse_attribute_type(annotation)
+            case ast.Attribute():
+                # Qualified type like typing.List, collections.OrderedDict
+                return self._parse_attribute_type(annotation)
 
-        else:
-            # Fallback: convert to string
-            try:
-                type_str = ast.unparse(annotation)
-                return TypeReference(name=type_str)
-            except:
-                return TypeReference(name="Any")
+            case _:
+                # Fallback: convert to string
+                try:
+                    type_str = ast.unparse(annotation)
+                    return TypeReference(name=type_str)
+                except:
+                    return TypeReference(name="Any")
 
     def _parse_subscript_type(self, node: ast.Subscript) -> TypeReference:
         """
@@ -415,21 +416,24 @@ class PythonParser:
             TypeReference with type arguments
         """
         # Get the base type name
-        if isinstance(node.value, ast.Name):
-            base_name = node.value.id
-            module = None
-        elif isinstance(node.value, ast.Attribute):
-            # Handle typing.List, etc.
-            base_name = node.value.attr
-            module = self._get_module_from_attribute(node.value)
-        else:
-            # Fallback
-            try:
-                base_name = ast.unparse(node.value)
+        match node.value:
+            case ast.Name():
+                base_name = node.value.id
                 module = None
-            except:
-                base_name = "Any"
-                module = None
+
+            case ast.Attribute():
+                # Handle typing.List, etc.
+                base_name = node.value.attr
+                module = self._get_module_from_attribute(node.value)
+
+            case _:
+                # Fallback
+                try:
+                    base_name = ast.unparse(node.value)
+                    module = None
+                except:
+                    base_name = "Any"
+                    module = None
 
         # Parse type arguments
         type_args = []
@@ -528,7 +532,7 @@ class PythonParser:
 
         return TypeReference(name=type_name, module=module)
 
-    def _get_module_from_attribute(self, node: ast.Attribute) -> Optional[str]:
+    def _get_module_from_attribute(self, node: ast.Attribute) -> str | None:
         """
         Extract module name from attribute node.
 
@@ -558,26 +562,27 @@ class PythonParser:
 
         Simple inference for Phase 1.
         """
-        if isinstance(value_node, ast.Constant):
-            # Infer from constant value
-            value_type = type(value_node.value).__name__
-            return TypeReference(name=value_type)
+        match value_node:
+            case ast.Constant():
+                # Infer from constant value
+                value_type = type(value_node.value).__name__
+                return TypeReference(name=value_type)
 
-        elif isinstance(value_node, ast.List):
-            return TypeReference(name="list")
+            case ast.List():
+                return TypeReference(name="list")
 
-        elif isinstance(value_node, ast.Dict):
-            return TypeReference(name="dict")
+            case ast.Dict():
+                return TypeReference(name="dict")
 
-        elif isinstance(value_node, ast.Set):
-            return TypeReference(name="set")
+            case ast.Set():
+                return TypeReference(name="set")
 
-        elif isinstance(value_node, ast.Tuple):
-            return TypeReference(name="tuple")
+            case ast.Tuple():
+                return TypeReference(name="tuple")
 
-        else:
-            # Default to Any
-            return TypeReference(name="Any")
+            case _:
+                # Default to Any
+                return TypeReference(name="Any")
 
     def _get_visibility_from_name(self, name: str) -> Visibility:
         """
@@ -618,7 +623,7 @@ class PythonParser:
                     return True
         return False
 
-    def _extract_decorators(self, decorator_list: List[ast.expr]) -> List[Decorator]:
+    def _extract_decorators(self, decorator_list: list[ast.expr]) -> list[Decorator]:
         """
         Extract decorators from decorator list.
 
@@ -631,44 +636,57 @@ class PythonParser:
         decorators = []
 
         for dec_node in decorator_list:
-            if isinstance(dec_node, ast.Name):
-                # Simple decorator like @property, @staticmethod
-                decorators.append(Decorator(name=dec_node.id))
+            match dec_node:
+                case ast.Name():
+                    # Simple decorator like @property, @staticmethod
+                    decorators.append(Decorator(name=dec_node.id))
 
-            elif isinstance(dec_node, ast.Attribute):
-                # Qualified decorator like @abc.abstractmethod
-                name = dec_node.attr
-                module = self._get_module_from_attribute(dec_node)
-                decorators.append(Decorator(name=name, module=module))
+                case ast.Attribute():
+                    # Qualified decorator like @abc.abstractmethod
+                    name = dec_node.attr
+                    module = self._get_module_from_attribute(dec_node)
+                    decorators.append(Decorator(name=name, module=module))
 
-            elif isinstance(dec_node, ast.Call):
-                # Decorator with arguments like @dataclass(frozen=True)
-                if isinstance(dec_node.func, ast.Name):
-                    name = dec_node.func.id
+                case ast.Call(func=ast.Name() as name_node):
+                    # Decorator with arguments from simple name
+                    name = name_node.id
                     module = None
-                elif isinstance(dec_node.func, ast.Attribute):
-                    name = dec_node.func.attr
-                    module = self._get_module_from_attribute(dec_node.func)
-                else:
-                    continue
+                    arguments = self._extract_decorator_arguments(dec_node)
+                    decorators.append(Decorator(name=name, module=module, arguments=arguments))
 
-                # Extract arguments (simplified - just capture as strings)
-                arguments = {}
-                for i, arg in enumerate(dec_node.args):
-                    try:
-                        arguments[f"arg{i}"] = ast.unparse(arg)
-                    except:
-                        arguments[f"arg{i}"] = str(arg)
-
-                for keyword in dec_node.keywords:
-                    try:
-                        arguments[keyword.arg] = ast.unparse(keyword.value)
-                    except:
-                        arguments[keyword.arg] = str(keyword.value)
-
-                decorators.append(Decorator(name=name, module=module, arguments=arguments))
+                case ast.Call(func=ast.Attribute() as attr_node):
+                    # Decorator with arguments from qualified name
+                    name = attr_node.attr
+                    module = self._get_module_from_attribute(attr_node)
+                    arguments = self._extract_decorator_arguments(dec_node)
+                    decorators.append(Decorator(name=name, module=module, arguments=arguments))
 
         return decorators
+
+    def _extract_decorator_arguments(self, call_node: ast.Call) -> dict[str, str]:
+        """
+        Extract arguments from decorator call node.
+
+        Args:
+            call_node: Call AST node
+
+        Returns:
+            Dictionary of argument names to values
+        """
+        arguments = {}
+        for i, arg in enumerate(call_node.args):
+            try:
+                arguments[f"arg{i}"] = ast.unparse(arg)
+            except:
+                arguments[f"arg{i}"] = str(arg)
+
+        for keyword in call_node.keywords:
+            try:
+                arguments[keyword.arg] = ast.unparse(keyword.value)
+            except:
+                arguments[keyword.arg] = str(keyword.value)
+
+        return arguments
 
     def _get_attribute_name(self, node: ast.Attribute) -> str:
         """Get full attribute name like module.ClassName."""
@@ -684,7 +702,7 @@ class PythonParser:
 
         return ".".join(parts)
 
-    def _infer_relationships(self) -> List[Relationship]:
+    def _infer_relationships(self) -> list[Relationship]:
         """
         Infer relationships between classes based on code patterns.
 
@@ -715,7 +733,7 @@ class PythonParser:
 
         return relationships
 
-    def _infer_inheritance(self, cls: Class, class_names: set, class_map: dict) -> List[Relationship]:
+    def _infer_inheritance(self, cls: Class, class_names: set, class_map: dict) -> list[Relationship]:
         """
         Infer inheritance relationships from base_classes.
 
@@ -743,7 +761,7 @@ class PythonParser:
 
         return relationships
 
-    def _infer_composition_aggregation(self, cls: Class, class_names: set, class_map: dict) -> List[Relationship]:
+    def _infer_composition_aggregation(self, cls: Class, class_names: set, class_map: dict) -> list[Relationship]:
         """
         Infer composition/aggregation relationships from attributes.
 
@@ -793,7 +811,7 @@ class PythonParser:
 
         return relationships
 
-    def _infer_dependencies(self, cls: Class, class_names: set, class_map: dict) -> List[Relationship]:
+    def _infer_dependencies(self, cls: Class, class_names: set, class_map: dict) -> list[Relationship]:
         """
         Infer dependency relationships from method parameters and return types.
 
@@ -882,7 +900,7 @@ class PythonParser:
         return type_ref.name in collection_types
 
 
-def parse_file_to_project(file_path: str, project_name: Optional[str] = None) -> Project:
+def parse_file_to_project(file_path: str, project_name: str | None = None) -> Project:
     """
     Convenience function to parse a Python file to a complete Project.
 
@@ -907,7 +925,7 @@ def parse_file_to_project(file_path: str, project_name: Optional[str] = None) ->
     return project
 
 
-def parse_folder_to_project(folder_path: str, project_name: Optional[str] = None) -> Project:
+def parse_folder_to_project(folder_path: str, project_name: str | None = None) -> Project:
     """
     Parse all Python files in a folder to a Project with nested package structure.
 

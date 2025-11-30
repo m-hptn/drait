@@ -4,7 +4,6 @@ PlantUML exporter for DRAIT metamodel.
 Converts DRAIT metamodel to PlantUML class diagram syntax for visualization.
 """
 
-from typing import List, Optional
 
 from drait.metamodel import (
     Project,
@@ -70,7 +69,7 @@ class PlantUMLExporter:
         lines.append("@enduml")
         return "\n".join(lines)
 
-    def export_package(self, package: Package) -> List[str]:
+    def export_package(self, package: Package) -> list[str]:
         """
         Export package to PlantUML.
 
@@ -106,7 +105,7 @@ class PlantUMLExporter:
 
         return lines
 
-    def export_class(self, cls: Class) -> List[str]:
+    def export_class(self, cls: Class) -> list[str]:
         """
         Export class to PlantUML.
 
@@ -147,7 +146,7 @@ class PlantUMLExporter:
 
         return lines
 
-    def export_relationship(self, rel: Relationship, classes: List[Class]) -> str:
+    def export_relationship(self, rel: Relationship, classes: list[Class]) -> str:
         """
         Export relationship to PlantUML.
 
@@ -287,14 +286,14 @@ class PlantUMLExporter:
         }
         return mapping.get(rel_type, "-->")
 
-    def _find_class_name(self, class_id, classes: List[Class]) -> Optional[str]:
+    def _find_class_name(self, class_id, classes: list[Class]) -> str | None:
         """Find class name by ID."""
         for cls in classes:
             if cls.id == class_id:
                 return cls.name
         return None
 
-    def _get_styling(self) -> List[str]:
+    def _get_styling(self) -> list[str]:
         """Get default PlantUML styling."""
         return [
             "skinparam classAttributeIconSize 0",
