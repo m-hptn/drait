@@ -57,10 +57,10 @@
 
 | Mitigation Strategies
 | • Engage Python experts in template design +
-• Comprehensive code quality checks (pylint, mypy, black) +
+• Comprehensive code quality checks (ruff, mypy) +
 • Configurable code style templates +
 • Review generated code samples with target users early +
-• Integrate popular formatters (black, isort)
+• Integrate modern linting and formatting (ruff)
 
 | Risk Reduction Measures
 | • Automated quality metrics on generated code +

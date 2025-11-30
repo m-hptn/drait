@@ -8,14 +8,15 @@ Tests all relationship types:
 - Dependency
 """
 
-import pytest
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from drait.parsers.python_parser import PythonParser
 from drait.metamodel import RelationshipType
+from drait.parsers.python_parser import PythonParser
 
 
 class TestInheritanceInference:
@@ -70,7 +71,9 @@ class Duck(Flyable, Swimmable):
         package = parser.parse_source(source)
 
         # Should have 2 inheritance relationships (Duck -> Flyable, Duck -> Swimmable)
-        inheritance_rels = [r for r in package.relationships if r.type == RelationshipType.INHERITANCE]
+        inheritance_rels = [
+            r for r in package.relationships if r.type == RelationshipType.INHERITANCE
+        ]
         assert len(inheritance_rels) == 2
 
     def test_inheritance_chain(self):
@@ -89,7 +92,9 @@ class Dog(Mammal):
         package = parser.parse_source(source)
 
         # Should have 2 inheritance relationships
-        inheritance_rels = [r for r in package.relationships if r.type == RelationshipType.INHERITANCE]
+        inheritance_rels = [
+            r for r in package.relationships if r.type == RelationshipType.INHERITANCE
+        ]
         assert len(inheritance_rels) == 2
 
 
@@ -111,7 +116,9 @@ class Car:
         package = parser.parse_source(source)
 
         # Check composition relationship
-        composition_rels = [r for r in package.relationships if r.type == RelationshipType.COMPOSITION]
+        composition_rels = [
+            r for r in package.relationships if r.type == RelationshipType.COMPOSITION
+        ]
         assert len(composition_rels) == 1
 
         rel = composition_rels[0]
@@ -136,7 +143,9 @@ class Car:
         parser = PythonParser()
         package = parser.parse_source(source)
 
-        composition_rels = [r for r in package.relationships if r.type == RelationshipType.COMPOSITION]
+        composition_rels = [
+            r for r in package.relationships if r.type == RelationshipType.COMPOSITION
+        ]
         assert len(composition_rels) == 2
 
 
@@ -159,7 +168,9 @@ class Employee:
         package = parser.parse_source(source)
 
         # Check aggregation relationship (Optional indicates shared, not owned)
-        aggregation_rels = [r for r in package.relationships if r.type == RelationshipType.AGGREGATION]
+        aggregation_rels = [
+            r for r in package.relationships if r.type == RelationshipType.AGGREGATION
+        ]
         assert len(aggregation_rels) == 1
 
         rel = aggregation_rels[0]
@@ -183,7 +194,9 @@ class Course:
         package = parser.parse_source(source)
 
         # List indicates collection/aggregation
-        aggregation_rels = [r for r in package.relationships if r.type == RelationshipType.AGGREGATION]
+        aggregation_rels = [
+            r for r in package.relationships if r.type == RelationshipType.AGGREGATION
+        ]
         assert len(aggregation_rels) == 1
 
         rel = aggregation_rels[0]
@@ -209,7 +222,9 @@ class OrderProcessor:
         package = parser.parse_source(source)
 
         # Check dependency relationship
-        dependency_rels = [r for r in package.relationships if r.type == RelationshipType.DEPENDENCY]
+        dependency_rels = [
+            r for r in package.relationships if r.type == RelationshipType.DEPENDENCY
+        ]
         assert len(dependency_rels) == 1
 
         rel = dependency_rels[0]
@@ -230,7 +245,9 @@ class CustomerFactory:
         parser = PythonParser()
         package = parser.parse_source(source)
 
-        dependency_rels = [r for r in package.relationships if r.type == RelationshipType.DEPENDENCY]
+        dependency_rels = [
+            r for r in package.relationships if r.type == RelationshipType.DEPENDENCY
+        ]
         assert len(dependency_rels) == 1
 
     def test_no_dependency_for_attributes(self):
@@ -250,11 +267,15 @@ class Car:
         package = parser.parse_source(source)
 
         # Should have composition (from attribute), not dependency
-        composition_rels = [r for r in package.relationships if r.type == RelationshipType.COMPOSITION]
+        composition_rels = [
+            r for r in package.relationships if r.type == RelationshipType.COMPOSITION
+        ]
         assert len(composition_rels) == 1
 
         # Should NOT have dependency for Engine (already an attribute)
-        dependency_rels = [r for r in package.relationships if r.type == RelationshipType.DEPENDENCY]
+        dependency_rels = [
+            r for r in package.relationships if r.type == RelationshipType.DEPENDENCY
+        ]
         assert len(dependency_rels) == 0
 
     def test_dependency_multiple_uses(self):
@@ -276,7 +297,9 @@ class CheckoutService:
         parser = PythonParser()
         package = parser.parse_source(source)
 
-        dependency_rels = [r for r in package.relationships if r.type == RelationshipType.DEPENDENCY]
+        dependency_rels = [
+            r for r in package.relationships if r.type == RelationshipType.DEPENDENCY
+        ]
         # Should have 3 dependencies: Order, Customer, Payment
         assert len(dependency_rels) == 3
 
@@ -316,7 +339,7 @@ class Employee:
 
         assert len(composition) == 1  # Address
         assert len(aggregation) == 1  # Department
-        assert len(dependency) == 1   # Project
+        assert len(dependency) == 1  # Project
 
     def test_external_class_ignored(self):
         """Test that relationships to external classes are not created."""

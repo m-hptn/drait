@@ -9,26 +9,27 @@ Tests cover:
 - Complete project export
 """
 
-import pytest
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+from drait.exporters.plantuml import PlantUMLExporter
 from drait.metamodel import (
-    Project,
-    Package,
-    Class,
     Attribute,
+    Class,
     Method,
+    Multiplicity,
+    Package,
     Parameter,
+    Project,
     Relationship,
+    RelationshipType,
     TypeReference,
     Visibility,
-    RelationshipType,
-    Multiplicity,
 )
-from drait.exporters.plantuml import PlantUMLExporter
 
 
 class TestPlantUMLExporter:

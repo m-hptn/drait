@@ -4,12 +4,12 @@ Command-line interface for DRAIT.
 Provides easy-to-use commands for parsing Python code and exporting diagrams.
 """
 
-import sys
 import argparse
+import sys
 from pathlib import Path
 
-from drait.parsers.python_parser import parse_file_to_project, parse_folder_to_project
 from drait.exporters.plantuml import PlantUMLExporter
+from drait.parsers.python_parser import parse_file_to_project, parse_folder_to_project
 
 
 def parse_command():
@@ -37,45 +37,38 @@ Examples:
 
   # Parse and show statistics
   drait-parse mycode.py --stats
-        """
+        """,
     )
 
+    parser.add_argument("input_path", type=str, help="Python source file or folder to parse")
+
     parser.add_argument(
-        "input_path",
+        "-o",
+        "--output",
         type=str,
-        help="Python source file or folder to parse"
+        help="Output file for PlantUML diagram (default: print to stdout)",
     )
 
     parser.add_argument(
-        "-o", "--output",
+        "-n",
+        "--name",
         type=str,
-        help="Output file for PlantUML diagram (default: print to stdout)"
+        help="Project name for diagram title (default: filename/folder name)",
+    )
+
+    parser.add_argument("--stats", action="store_true", help="Show statistics about parsed code")
+
+    parser.add_argument(
+        "--no-relationships", action="store_true", help="Exclude relationships from diagram"
     )
 
     parser.add_argument(
-        "-n", "--name",
-        type=str,
-        help="Project name for diagram title (default: filename/folder name)"
-    )
-
-    parser.add_argument(
-        "--stats",
-        action="store_true",
-        help="Show statistics about parsed code"
-    )
-
-    parser.add_argument(
-        "--no-relationships",
-        action="store_true",
-        help="Exclude relationships from diagram"
-    )
-
-    parser.add_argument(
-        "-f", "--format",
+        "-f",
+        "--format",
         type=str,
         choices=["plantuml", "json"],
         default="plantuml",
-        help="Output format: plantuml or json (default: plantuml)"
+        help="Output format: plantuml or json (default: plantuml)",
     )
 
     args = parser.parse_args()
@@ -120,11 +113,11 @@ Examples:
         # Count features across all packages
         all_classes = [cls for pkg in project.packages for cls in pkg.classes]
         abstract_classes = sum(1 for cls in all_classes if cls.is_abstract)
-        dataclasses = sum(1 for cls in all_classes
-                         if any(d.name == "dataclass" for d in cls.decorators))
+        dataclasses = sum(
+            1 for cls in all_classes if any(d.name == "dataclass" for d in cls.decorators)
+        )
         total_methods = sum(len(cls.methods) for cls in all_classes)
-        abstract_methods = sum(1 for cls in all_classes
-                              for m in cls.methods if m.is_abstract)
+        abstract_methods = sum(1 for cls in all_classes for m in cls.methods if m.is_abstract)
 
         print("Features:")
         print(f"  Abstract classes: {abstract_classes}")
@@ -137,6 +130,7 @@ Examples:
     if args.format == "json":
         # Export as JSON
         import json
+
         output_data = project.to_dict()
         output_text = json.dumps(output_data, indent=2)
 
@@ -167,23 +161,19 @@ def export_command():
         drait-export model.json
         drait-export model.json -o diagram.puml
     """
-    parser = argparse.ArgumentParser(
-        description="Export DRAIT model to PlantUML diagram"
-    )
+    parser = argparse.ArgumentParser(description="Export DRAIT model to PlantUML diagram")
+
+    parser.add_argument("model_file", type=str, help="DRAIT JSON model file")
 
     parser.add_argument(
-        "model_file",
+        "-o",
+        "--output",
         type=str,
-        help="DRAIT JSON model file"
+        help="Output file for PlantUML diagram (default: print to stdout)",
     )
 
-    parser.add_argument(
-        "-o", "--output",
-        type=str,
-        help="Output file for PlantUML diagram (default: print to stdout)"
-    )
-
-    args = parser.parse_args()
+    # Parse args to validate command-line syntax
+    parser.parse_args()
 
     # This would load from JSON and export
     # For now, just show a message
@@ -218,20 +208,13 @@ Quick start:
 
 Or use the direct commands:
   drait-parse mycode.py -o diagram.puml
-        """
+        """,
     )
 
-    parser.add_argument(
-        "--version",
-        action="version",
-        version="DRAIT 0.1.0"
-    )
+    parser.add_argument("--version", action="version", version="DRAIT 0.1.0")
 
     parser.add_argument(
-        "command",
-        nargs="?",
-        choices=["parse", "export"],
-        help="Command to execute"
+        "command", nargs="?", choices=["parse", "export"], help="Command to execute"
     )
 
     # Parse just the command

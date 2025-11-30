@@ -8,29 +8,28 @@ __version__ = "0.1.0"
 __author__ = "DRAIT Development Team"
 
 # Metamodel
+# Exporters
+from .exporters.plantuml import PlantUMLExporter
 from .metamodel import (
-    Project,
-    Package,
-    Class,
     Attribute,
-    Method,
-    Parameter,
-    Relationship,
-    TypeReference,
+    Class,
     Decorator,
     Import,
-    Position,
-    Visibility,
-    RelationshipType,
-    ParameterKind,
+    Method,
     Multiplicity,
+    Package,
+    Parameter,
+    ParameterKind,
+    Position,
+    Project,
+    Relationship,
+    RelationshipType,
+    TypeReference,
+    Visibility,
 )
 
 # Parser
 from .parsers.python_parser import PythonParser, parse_file_to_project, parse_folder_to_project
-
-# Exporters
-from .exporters.plantuml import PlantUMLExporter
 
 __all__ = [
     # Metamodel
