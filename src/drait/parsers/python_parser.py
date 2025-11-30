@@ -35,10 +35,10 @@ class PythonParser:
     - Basic visibility detection from naming conventions
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the parser."""
         self.current_class = None
-        self.classes = []
+        self.classes: list[Class] = []
 
     def parse_file(self, file_path: str) -> Package:
         """
@@ -467,7 +467,7 @@ class PythonParser:
         # Collect all types in the union
         types = []
 
-        def collect_union_types(n):
+        def collect_union_types(n: ast.expr) -> None:
             if isinstance(n, ast.BinOp) and isinstance(n.op, ast.BitOr):
                 collect_union_types(n.left)
                 collect_union_types(n.right)
@@ -526,8 +526,8 @@ class PythonParser:
             return node.value.id
         elif isinstance(node.value, ast.Attribute):
             # Nested attributes like a.b.c
-            parts = []
-            current = node.value
+            parts: list[str] = []
+            current: ast.expr = node.value
             while isinstance(current, ast.Attribute):
                 parts.insert(0, current.attr)
                 current = current.value
@@ -660,18 +660,19 @@ class PythonParser:
             except:
                 arguments[f"arg{i}"] = str(arg)
 
-        for keyword in call_node.keywords:
+        for i, keyword in enumerate(call_node.keywords):
+            key = keyword.arg if keyword.arg else f"kwarg{i}"
             try:
-                arguments[keyword.arg] = ast.unparse(keyword.value)
+                arguments[key] = ast.unparse(keyword.value)
             except:
-                arguments[keyword.arg] = str(keyword.value)
+                arguments[key] = str(keyword.value)
 
         return arguments
 
     def _get_attribute_name(self, node: ast.Attribute) -> str:
         """Get full attribute name like module.ClassName."""
-        parts = []
-        current = node
+        parts: list[str] = []
+        current: ast.expr = node
 
         while isinstance(current, ast.Attribute):
             parts.insert(0, current.attr)

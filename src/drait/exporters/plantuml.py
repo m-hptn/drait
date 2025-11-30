@@ -4,6 +4,8 @@ PlantUML exporter for DRAIT metamodel.
 Converts DRAIT metamodel to PlantUML class diagram syntax for visualization.
 """
 
+from typing import Any
+
 from drait.metamodel import (
     Attribute,
     Class,
@@ -286,9 +288,10 @@ class PlantUMLExporter:
         }
         return mapping.get(rel_type, "-->")
 
-    def _find_class_name(self, class_id, classes: list[Class]) -> str | None:
-        """Find class name by ID."""
+    def _find_class_name(self, class_id: Any, classes: list[Class]) -> str | None:
+        """Find class name by ID (accepts UUID or str)."""
         for cls in classes:
+            # Compare as-is (both should be UUID type)
             if cls.id == class_id:
                 return cls.name
         return None
@@ -305,7 +308,7 @@ class PlantUMLExporter:
         ]
 
 
-def export_to_file(project: Project, output_file: str, **kwargs) -> None:
+def export_to_file(project: Project, output_file: str, **kwargs: Any) -> None:
     """
     Export project to PlantUML file.
 

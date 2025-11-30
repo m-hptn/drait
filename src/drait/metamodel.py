@@ -337,7 +337,7 @@ class Class:
     position: Position | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Generate deterministic ID based on class name and source file."""
         # Use source file path if available for more uniqueness
         source_file = self.metadata.get("source_file", "")

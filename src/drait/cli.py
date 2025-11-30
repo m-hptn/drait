@@ -12,7 +12,7 @@ from drait.exporters.plantuml import PlantUMLExporter
 from drait.parsers.python_parser import parse_file_to_project, parse_folder_to_project
 
 
-def parse_command():
+def parse_command() -> None:
     """
     Parse Python file and generate PlantUML diagram.
 
@@ -153,7 +153,7 @@ Examples:
             print(plantuml_code)
 
 
-def export_command():
+def export_command() -> None:
     """
     Export existing DRAIT JSON model to PlantUML.
 
@@ -182,7 +182,7 @@ def export_command():
     sys.exit(1)
 
 
-def main():
+def main() -> None:
     """
     Main entry point for drait command.
 
