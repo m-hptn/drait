@@ -67,7 +67,7 @@ If you just want to generate HTML without all docToolchain features:
 
 2. Generate HTML:
    ```bash
-   cd /home/hauptenb/git/drait/docs/arc42/src/docs
+   cd docs/arc42/src/docs
    asciidoctor arc42.adoc -o ../../build/arc42.html
    ```
 
@@ -82,7 +82,7 @@ Note: This won't render PlantUML diagrams. For full diagram support, use Option 
 
 1. Download the docToolchain wrapper (run from the docs/arc42 directory):
    ```bash
-   cd /home/hauptenb/git/drait/docs/arc42
+   cd docs/arc42
    curl -Lo dtcw https://raw.githubusercontent.com/docToolchain/docToolchain/ng/dtcw
    chmod +x dtcw
    ```
@@ -104,7 +104,7 @@ Note: This won't render PlantUML diagrams. For full diagram support, use Option 
    # Open in default browser
    xdg-open build/html5/arc42.html
 
-   # Or just navigate to: /home/hauptenb/git/drait/docs/arc42/build/html5/arc42.html
+   # Or navigate to: docs/arc42/build/html5/arc42.html
    ```
 
 **Note:** If you downloaded dtcw in a different directory, either move it to `docs/arc42/` or use the full path like `/path/to/dtcw generateHTML` when running from the `docs/arc42/` directory.
@@ -133,7 +133,7 @@ After generation, the documentation will be at:
 
 Open the file in your web browser:
 ```bash
-xdg-open /home/hauptenb/git/drait/docs/arc42/build/html5/arc42.html
+xdg-open docs/arc42/build/html5/arc42.html
 ```
 
 ## Editing Documentation
