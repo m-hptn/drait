@@ -250,14 +250,121 @@ class TestMyFeature:
 
 ## CI/CD Integration
 
-Tests can be integrated into GitHub Actions (when configured).
+Tests are automatically run via GitHub Actions on every push and pull request to `main` or `develop` branches.
 
-Example workflow:
+### Automated Testing
 
-```yaml
-- name: Run tests
-  run: pytest --cov=src/drait
+The CI pipeline (`.github/workflows/test.yml`) includes:
+
+1. **Code Quality Checks** (fail-fast):
+   - Ruff linting (`ruff check`)
+   - Ruff formatting (`ruff format --check`)
+   - mypy type checking (`mypy src/drait/`)
+
+2. **Multi-version Testing**:
+   - Python versions: 3.10, 3.11, 3.12, 3.13
+   - Operating systems: Ubuntu (all versions), macOS (3.10, 3.13), Windows (3.10, 3.13)
+   - 82 test cases across all combinations
+
+3. **Coverage Verification**:
+   - Minimum 80% code coverage required
+   - Coverage reports uploaded to Codecov (if configured)
+   - Fails if coverage drops below threshold
+
+### Viewing CI Results
+
+Check the Actions tab on GitHub: https://github.com/m-hptn/drait/actions
+
+## Desktop Application Testing
+
+⚠️ **Manual Testing Required - Desktop App Not in CI**
+
+The Electron desktop application is **not automatically tested** by GitHub Actions. Contributors must test manually before submitting PRs.
+
+### Why Not Automated?
+
+- Electron GUI testing requires more complex setup
+- Visual verification needed for UI components
+- Different testing tools required (e.g., Spectron, Playwright)
+- May be added in future iterations
+
+### Manual Testing Process
+
+#### Prerequisites
+
+```bash
+cd src/desktop
+npm install
 ```
+
+#### Running the Desktop App
+
+```bash
+# Development mode with hot reload
+npm run dev
+
+# Production build
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+### Desktop App Testing Checklist
+
+Before submitting PRs that touch the desktop app (`src/desktop/`), verify:
+
+**Core Functionality:**
+- [ ] Application launches without errors
+- [ ] No errors in DevTools console (Ctrl+Shift+I / Cmd+Option+I)
+
+**File Operations:**
+- [ ] Single Python file import works
+- [ ] Folder/directory import works
+- [ ] File picker dialog functions correctly
+
+**Diagram Visualization:**
+- [ ] UML diagram renders with React Flow
+- [ ] Classes display correctly with attributes and methods
+- [ ] Package grouping shows proper hierarchy
+- [ ] Relationships (arrows) render correctly
+
+**Interaction:**
+- [ ] Drag-and-drop node positioning works
+- [ ] Zoom in/out functions properly
+- [ ] Pan/scroll through large diagrams
+- [ ] Resize package containers
+
+**Data Persistence:**
+- [ ] Layout positions are saved automatically
+- [ ] Positions restore correctly on re-open
+- [ ] No data loss on app restart
+
+**UI/UX:**
+- [ ] Interface is responsive and intuitive
+- [ ] Buttons and controls work as expected
+- [ ] Error messages are clear and helpful
+
+### Platform-Specific Testing
+
+If possible, test on multiple platforms:
+- **Linux** (primary development platform)
+- **macOS** (if available)
+- **Windows** (if available)
+
+Different platforms may have different behaviors with:
+- File path handling
+- Window rendering
+- Keyboard shortcuts
+
+### Reporting Desktop App Issues
+
+When reporting bugs for the desktop app:
+1. Specify OS and version
+2. Include steps to reproduce
+3. Attach screenshots if relevant
+4. Check browser console for error messages
+5. Note any relevant configuration
 
 ## Troubleshooting
 
