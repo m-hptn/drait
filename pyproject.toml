@@ -7,8 +7,8 @@ name = "drait"
 version = "0.1.0"
 description = "Model-Driven Development tool for bidirectional UML class diagram and Python code synchronization"
 readme = "README.md"
-requires-python = ">=3.8"
-license = {text = "MIT"}
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
 authors = [
     {name = "DRAIT Development Team"}
 ]
@@ -18,13 +18,13 @@ classifiers = [
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Code Generators",
     "Topic :: Software Development :: Documentation",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 
 dependencies = []
@@ -60,10 +60,10 @@ addopts = "-v --strict-markers --tb=short"
 
 [tool.black]
 line-length = 100
-target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+target-version = ['py310', 'py311', 'py312', 'py313', 'py314']
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false

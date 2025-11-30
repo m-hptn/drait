@@ -25,7 +25,7 @@
 *** Clear documentation
 ** Compatibility
 *** Cross-platform support
-*** Python version compatibility (3.8+)
+*** Python version compatibility (3.10-3.14)
 *** Git integration
 ** Extensibility
 *** Plugin architecture for new languages
@@ -281,7 +281,7 @@
 | Scenario ID | C2: Python Version Compatibility
 
 | Scenario
-| Generated code runs on Python 3.8 through 3.12
+| Generated code runs on Python 3.10 through 3.14
 
 | Source
 | Automated test suite
@@ -296,7 +296,7 @@
 | All tests pass on all supported versions
 
 | Response Measure
-| 100% test success rate on Python 3.8, 3.9, 3.10, 3.11, 3.12
+| 100% test success rate on Python 3.10, 3.11, 3.12, 3.13, 3.14
 |===
 
 ==== Extensibility Scenarios
