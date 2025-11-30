@@ -297,7 +297,9 @@ This project is in early stages. Contribution guidelines will be added as the pr
 
 ## License
 
-[To be determined]
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+Copyright 2025 Drait Contributors
 
 ## Architecture Highlights
 
