@@ -7,7 +7,7 @@ and their mapping to Python code.
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 from uuid import UUID, uuid4, uuid5, NAMESPACE_DNS
 
 
@@ -63,10 +63,10 @@ class Position:
     """Position and size information for diagram elements."""
     x: float
     y: float
-    width: Optional[float] = None
-    height: Optional[float] = None
+    width: float | None = None
+    height: float | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
             "x": self.x,
@@ -76,7 +76,7 @@ class Position:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Position":
+    def from_dict(cls, data: dict[str, Any]) -> "Position":
         """Create from dictionary."""
         return cls(
             x=data["x"],
@@ -90,10 +90,10 @@ class Position:
 class Import:
     """Represents a Python import statement."""
     module: str
-    symbols: List[str] = field(default_factory=list)
-    alias: Optional[str] = None
+    symbols: list[str] = field(default_factory=list)
+    alias: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
             "module": self.module,
@@ -102,7 +102,7 @@ class Import:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Import":
+    def from_dict(cls, data: dict[str, Any]) -> "Import":
         """Create from dictionary."""
         return cls(
             module=data["module"],
@@ -118,15 +118,15 @@ class TypeReference:
 
     Examples:
         - str: TypeReference(name="str")
-        - List[str]: TypeReference(name="List", module="typing", type_arguments=[TypeReference(name="str")])
-        - Optional[int]: TypeReference(name="int", is_optional=True)
+        - list[str]: TypeReference(name="list", type_arguments=[TypeReference(name="str")])
+        - int | None: TypeReference(name="int", is_optional=True)
     """
     name: str
-    module: Optional[str] = None
-    type_arguments: List["TypeReference"] = field(default_factory=list)
+    module: str | None = None
+    type_arguments: list["TypeReference"] = field(default_factory=list)
     is_optional: bool = False
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
             "name": self.name,
@@ -136,7 +136,7 @@ class TypeReference:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "TypeReference":
+    def from_dict(cls, data: dict[str, Any]) -> "TypeReference":
         """Create from dictionary."""
         return cls(
             name=data["name"],
@@ -156,7 +156,7 @@ class TypeReference:
             base = self.name
 
         if self.is_optional:
-            return f"Optional[{base}]"
+            return f"{base} | None"
         return base
 
 
@@ -164,10 +164,10 @@ class TypeReference:
 class Decorator:
     """Represents a Python decorator."""
     name: str
-    module: Optional[str] = None
-    arguments: Dict[str, str] = field(default_factory=dict)
+    module: str | None = None
+    arguments: dict[str, str] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
             "name": self.name,
@@ -176,7 +176,7 @@ class Decorator:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Decorator":
+    def from_dict(cls, data: dict[str, Any]) -> "Decorator":
         """Create from dictionary."""
         return cls(
             name=data["name"],
@@ -191,11 +191,11 @@ class Decorator:
 class Parameter:
     """Represents a method parameter."""
     name: str
-    type: Optional[TypeReference] = None
-    default_value: Optional[str] = None
+    type: TypeReference | None = None
+    default_value: str | None = None
     kind: ParameterKind = ParameterKind.POSITIONAL
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
             "name": self.name,
@@ -205,7 +205,7 @@ class Parameter:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Parameter":
+    def from_dict(cls, data: dict[str, Any]) -> "Parameter":
         """Create from dictionary."""
         return cls(
             name=data["name"],
@@ -222,13 +222,13 @@ class Attribute:
     type: TypeReference
     id: UUID = field(default_factory=uuid4)
     visibility: Visibility = Visibility.PUBLIC
-    default_value: Optional[str] = None
+    default_value: str | None = None
     is_static: bool = False
     is_readonly: bool = False
-    decorators: List[Decorator] = field(default_factory=list)
-    docstring: Optional[str] = None
+    decorators: list[Decorator] = field(default_factory=list)
+    docstring: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
             "id": str(self.id),
@@ -243,7 +243,7 @@ class Attribute:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Attribute":
+    def from_dict(cls, data: dict[str, Any]) -> "Attribute":
         """Create from dictionary."""
         return cls(
             id=UUID(data["id"]),
@@ -263,17 +263,17 @@ class Method:
     """Represents a class method/function."""
     name: str
     id: UUID = field(default_factory=uuid4)
-    parameters: List[Parameter] = field(default_factory=list)
-    return_type: Optional[TypeReference] = None
+    parameters: list[Parameter] = field(default_factory=list)
+    return_type: TypeReference | None = None
     visibility: Visibility = Visibility.PUBLIC
     is_static: bool = False
     is_class_method: bool = False
     is_abstract: bool = False
-    decorators: List[Decorator] = field(default_factory=list)
-    docstring: Optional[str] = None
-    body: Optional[str] = None
+    decorators: list[Decorator] = field(default_factory=list)
+    docstring: str | None = None
+    body: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
             "id": str(self.id),
@@ -290,7 +290,7 @@ class Method:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Method":
+    def from_dict(cls, data: dict[str, Any]) -> "Method":
         """Create from dictionary."""
         return cls(
             id=UUID(data["id"]),
@@ -312,15 +312,15 @@ class Class:
     """Represents a Python class with attributes, methods, and metadata."""
     name: str
     id: UUID = field(default_factory=uuid4)  # Will be overridden in __post_init__
-    attributes: List[Attribute] = field(default_factory=list)
-    methods: List[Method] = field(default_factory=list)
-    decorators: List[Decorator] = field(default_factory=list)
-    stereotypes: List[str] = field(default_factory=list)
-    base_classes: List[str] = field(default_factory=list)
+    attributes: list[Attribute] = field(default_factory=list)
+    methods: list[Method] = field(default_factory=list)
+    decorators: list[Decorator] = field(default_factory=list)
+    stereotypes: list[str] = field(default_factory=list)
+    base_classes: list[str] = field(default_factory=list)
     is_abstract: bool = False
-    docstring: Optional[str] = None
-    position: Optional[Position] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    docstring: str | None = None
+    position: Position | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         """Generate deterministic ID based on class name and source file."""
@@ -329,7 +329,7 @@ class Class:
         namespace = f"{source_file}:{self.name}" if source_file else self.name
         self.id = generate_deterministic_uuid(namespace)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
             "id": str(self.id),
@@ -346,7 +346,7 @@ class Class:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Class":
+    def from_dict(cls, data: dict[str, Any]) -> "Class":
         """Create from dictionary."""
         return cls(
             id=UUID(data["id"]),
@@ -370,14 +370,14 @@ class Relationship:
     source_id: UUID
     target_id: UUID
     id: UUID = field(default_factory=uuid4)
-    source_role: Optional[str] = None
-    target_role: Optional[str] = None
-    source_multiplicity: Optional[Multiplicity] = None
-    target_multiplicity: Optional[Multiplicity] = None
+    source_role: str | None = None
+    target_role: str | None = None
+    source_multiplicity: Multiplicity | None = None
+    target_multiplicity: Multiplicity | None = None
     is_navigable_from_source: bool = True
     is_navigable_from_target: bool = True
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
             "id": str(self.id),
@@ -393,7 +393,7 @@ class Relationship:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Relationship":
+    def from_dict(cls, data: dict[str, Any]) -> "Relationship":
         """Create from dictionary."""
         return cls(
             id=UUID(data["id"]),
@@ -414,12 +414,12 @@ class Package:
     """Represents a Python package/module containing classes."""
     name: str
     id: UUID = field(default_factory=uuid4)
-    classes: List[Class] = field(default_factory=list)
-    relationships: List[Relationship] = field(default_factory=list)
-    imports: List[Import] = field(default_factory=list)
-    docstring: Optional[str] = None
+    classes: list[Class] = field(default_factory=list)
+    relationships: list[Relationship] = field(default_factory=list)
+    imports: list[Import] = field(default_factory=list)
+    docstring: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
             "id": str(self.id),
@@ -431,7 +431,7 @@ class Package:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Package":
+    def from_dict(cls, data: dict[str, Any]) -> "Package":
         """Create from dictionary."""
         return cls(
             id=UUID(data["id"]),
@@ -449,10 +449,10 @@ class Project:
     name: str
     id: UUID = field(default_factory=uuid4)
     version: str = "1.0.0"
-    packages: List[Package] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    packages: list[Package] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
             "id": str(self.id),
@@ -463,7 +463,7 @@ class Project:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Project":
+    def from_dict(cls, data: dict[str, Any]) -> "Project":
         """Create from dictionary."""
         return cls(
             id=UUID(data["id"]),

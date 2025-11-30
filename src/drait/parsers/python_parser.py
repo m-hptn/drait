@@ -7,7 +7,7 @@ Phase 1: Basic class, attribute, and method extraction.
 
 import ast
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import Any
 
 from drait.metamodel import (
     Project,
@@ -94,7 +94,7 @@ class PythonParser:
 
         return package
 
-    def _extract_class(self, node: ast.ClassDef) -> Optional[Class]:
+    def _extract_class(self, node: ast.ClassDef) -> Class | None:
         """
         Extract class information from AST node.
 
@@ -155,7 +155,7 @@ class PythonParser:
 
         return cls
 
-    def _extract_class_attributes(self, node: ast.ClassDef) -> List[Attribute]:
+    def _extract_class_attributes(self, node: ast.ClassDef) -> list[Attribute]:
         """
         Extract class-level attributes (not from __init__).
 
@@ -194,7 +194,7 @@ class PythonParser:
 
         return attributes
 
-    def _extract_init_attributes(self, node: ast.FunctionDef) -> List[Attribute]:
+    def _extract_init_attributes(self, node: ast.FunctionDef) -> list[Attribute]:
         """
         Extract instance attributes from __init__ method.
 
@@ -240,7 +240,7 @@ class PythonParser:
         name: str,
         value_node: ast.expr,
         is_static: bool
-    ) -> Optional[Attribute]:
+    ) -> Attribute | None:
         """Create attribute from simple assignment."""
         # Infer type from value if possible
         type_ref = self._infer_type_from_value(value_node)
@@ -268,9 +268,9 @@ class PythonParser:
         self,
         name: str,
         annotation: ast.expr,
-        value_node: Optional[ast.expr],
+        value_node: ast.expr | None,
         is_static: bool
-    ) -> Optional[Attribute]:
+    ) -> Attribute | None:
         """Create attribute from annotated assignment (with type hint)."""
         # Parse type annotation
         type_ref = self._parse_type_annotation(annotation)
@@ -294,7 +294,7 @@ class PythonParser:
             default_value=default_value,
         )
 
-    def _extract_method(self, node: ast.FunctionDef) -> Optional[Method]:
+    def _extract_method(self, node: ast.FunctionDef) -> Method | None:
         """
         Extract method information from AST node.
 
@@ -350,7 +350,7 @@ class PythonParser:
 
         return method
 
-    def _extract_parameter(self, arg: ast.arg) -> Optional[Parameter]:
+    def _extract_parameter(self, arg: ast.arg) -> Parameter | None:
         """
         Extract parameter information.
 
@@ -528,7 +528,7 @@ class PythonParser:
 
         return TypeReference(name=type_name, module=module)
 
-    def _get_module_from_attribute(self, node: ast.Attribute) -> Optional[str]:
+    def _get_module_from_attribute(self, node: ast.Attribute) -> str | None:
         """
         Extract module name from attribute node.
 
@@ -618,7 +618,7 @@ class PythonParser:
                     return True
         return False
 
-    def _extract_decorators(self, decorator_list: List[ast.expr]) -> List[Decorator]:
+    def _extract_decorators(self, decorator_list: list[ast.expr]) -> list[Decorator]:
         """
         Extract decorators from decorator list.
 
@@ -684,7 +684,7 @@ class PythonParser:
 
         return ".".join(parts)
 
-    def _infer_relationships(self) -> List[Relationship]:
+    def _infer_relationships(self) -> list[Relationship]:
         """
         Infer relationships between classes based on code patterns.
 
@@ -715,7 +715,7 @@ class PythonParser:
 
         return relationships
 
-    def _infer_inheritance(self, cls: Class, class_names: set, class_map: dict) -> List[Relationship]:
+    def _infer_inheritance(self, cls: Class, class_names: set, class_map: dict) -> list[Relationship]:
         """
         Infer inheritance relationships from base_classes.
 
@@ -743,7 +743,7 @@ class PythonParser:
 
         return relationships
 
-    def _infer_composition_aggregation(self, cls: Class, class_names: set, class_map: dict) -> List[Relationship]:
+    def _infer_composition_aggregation(self, cls: Class, class_names: set, class_map: dict) -> list[Relationship]:
         """
         Infer composition/aggregation relationships from attributes.
 
@@ -793,7 +793,7 @@ class PythonParser:
 
         return relationships
 
-    def _infer_dependencies(self, cls: Class, class_names: set, class_map: dict) -> List[Relationship]:
+    def _infer_dependencies(self, cls: Class, class_names: set, class_map: dict) -> list[Relationship]:
         """
         Infer dependency relationships from method parameters and return types.
 
@@ -882,7 +882,7 @@ class PythonParser:
         return type_ref.name in collection_types
 
 
-def parse_file_to_project(file_path: str, project_name: Optional[str] = None) -> Project:
+def parse_file_to_project(file_path: str, project_name: str | None = None) -> Project:
     """
     Convenience function to parse a Python file to a complete Project.
 
@@ -907,7 +907,7 @@ def parse_file_to_project(file_path: str, project_name: Optional[str] = None) ->
     return project
 
 
-def parse_folder_to_project(folder_path: str, project_name: Optional[str] = None) -> Project:
+def parse_folder_to_project(folder_path: str, project_name: str | None = None) -> Project:
     """
     Parse all Python files in a folder to a Project with nested package structure.
 

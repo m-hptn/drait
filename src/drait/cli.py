@@ -7,7 +7,6 @@ Provides easy-to-use commands for parsing Python code and exporting diagrams.
 import sys
 import argparse
 from pathlib import Path
-from typing import Optional
 
 from drait.parsers.python_parser import parse_file_to_project, parse_folder_to_project
 from drait.exporters.plantuml import PlantUMLExporter
