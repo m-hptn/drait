@@ -6,21 +6,21 @@ Phase 1: Basic class, attribute, and method extraction.
 """
 
 import ast
+import sys
 from pathlib import Path
-from typing import Any
 
 from drait.metamodel import (
-    Project,
-    Package,
-    Class,
     Attribute,
+    Class,
+    Decorator,
     Method,
+    Package,
     Parameter,
-    TypeReference,
-    Visibility,
+    Project,
     Relationship,
     RelationshipType,
-    Decorator,
+    TypeReference,
+    Visibility,
 )
 
 
@@ -35,10 +35,10 @@ class PythonParser:
     - Basic visibility detection from naming conventions
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the parser."""
         self.current_class = None
-        self.classes = []
+        self.classes: list[Class] = []
 
     def parse_file(self, file_path: str) -> Package:
         """
@@ -50,7 +50,7 @@ class PythonParser:
         Returns:
             Package containing extracted classes
         """
-        with open(file_path, 'r') as f:
+        with open(file_path) as f:
             source_code = f.read()
 
         return self.parse_source(source_code, file_path)
@@ -173,9 +173,7 @@ class PythonParser:
                 for target in item.targets:
                     if isinstance(target, ast.Name):
                         attr = self._create_attribute_from_assignment(
-                            target.id,
-                            item.value,
-                            is_static=True
+                            target.id, item.value, is_static=True
                         )
                         if attr:
                             attributes.append(attr)
@@ -184,10 +182,7 @@ class PythonParser:
             elif isinstance(item, ast.AnnAssign):
                 if isinstance(item.target, ast.Name):
                     attr = self._create_attribute_from_annotated_assignment(
-                        item.target.id,
-                        item.annotation,
-                        item.value,
-                        is_static=True
+                        item.target.id, item.annotation, item.value, is_static=True
                     )
                     if attr:
                         attributes.append(attr)
@@ -213,9 +208,7 @@ class PythonParser:
                     if isinstance(target, ast.Attribute):
                         if isinstance(target.value, ast.Name) and target.value.id == "self":
                             attr = self._create_attribute_from_assignment(
-                                target.attr,
-                                item.value,
-                                is_static=False
+                                target.attr, item.value, is_static=False
                             )
                             if attr:
                                 attributes.append(attr)
@@ -225,10 +218,7 @@ class PythonParser:
                 if isinstance(item.target, ast.Attribute):
                     if isinstance(item.target.value, ast.Name) and item.target.value.id == "self":
                         attr = self._create_attribute_from_annotated_assignment(
-                            item.target.attr,
-                            item.annotation,
-                            item.value,
-                            is_static=False
+                            item.target.attr, item.annotation, item.value, is_static=False
                         )
                         if attr:
                             attributes.append(attr)
@@ -236,10 +226,7 @@ class PythonParser:
         return attributes
 
     def _create_attribute_from_assignment(
-        self,
-        name: str,
-        value_node: ast.expr,
-        is_static: bool
+        self, name: str, value_node: ast.expr, is_static: bool
     ) -> Attribute | None:
         """Create attribute from simple assignment."""
         # Infer type from value if possible
@@ -265,11 +252,7 @@ class PythonParser:
         )
 
     def _create_attribute_from_annotated_assignment(
-        self,
-        name: str,
-        annotation: ast.expr,
-        value_node: ast.expr | None,
-        is_static: bool
+        self, name: str, annotation: ast.expr, value_node: ast.expr | None, is_static: bool
     ) -> Attribute | None:
         """Create attribute from annotated assignment (with type hint)."""
         # Parse type annotation
@@ -484,7 +467,7 @@ class PythonParser:
         # Collect all types in the union
         types = []
 
-        def collect_union_types(n):
+        def collect_union_types(n: ast.expr) -> None:
             if isinstance(n, ast.BinOp) and isinstance(n.op, ast.BitOr):
                 collect_union_types(n.left)
                 collect_union_types(n.right)
@@ -494,10 +477,7 @@ class PythonParser:
         collect_union_types(node)
 
         # Check if None is in the union (makes it optional)
-        has_none = any(
-            isinstance(t, TypeReference) and t.name == "None"
-            for t in types
-        )
+        has_none = any(isinstance(t, TypeReference) and t.name == "None" for t in types)
 
         if has_none:
             # Filter out None
@@ -546,8 +526,8 @@ class PythonParser:
             return node.value.id
         elif isinstance(node.value, ast.Attribute):
             # Nested attributes like a.b.c
-            parts = []
-            current = node.value
+            parts: list[str] = []
+            current: ast.expr = node.value
             while isinstance(current, ast.Attribute):
                 parts.insert(0, current.attr)
                 current = current.value
@@ -680,18 +660,19 @@ class PythonParser:
             except:
                 arguments[f"arg{i}"] = str(arg)
 
-        for keyword in call_node.keywords:
+        for i, keyword in enumerate(call_node.keywords):
+            key = keyword.arg if keyword.arg else f"kwarg{i}"
             try:
-                arguments[keyword.arg] = ast.unparse(keyword.value)
+                arguments[key] = ast.unparse(keyword.value)
             except:
-                arguments[keyword.arg] = str(keyword.value)
+                arguments[key] = str(keyword.value)
 
         return arguments
 
     def _get_attribute_name(self, node: ast.Attribute) -> str:
         """Get full attribute name like module.ClassName."""
-        parts = []
-        current = node
+        parts: list[str] = []
+        current: ast.expr = node
 
         while isinstance(current, ast.Attribute):
             parts.insert(0, current.attr)
@@ -733,7 +714,9 @@ class PythonParser:
 
         return relationships
 
-    def _infer_inheritance(self, cls: Class, class_names: set, class_map: dict) -> list[Relationship]:
+    def _infer_inheritance(
+        self, cls: Class, class_names: set, class_map: dict
+    ) -> list[Relationship]:
         """
         Infer inheritance relationships from base_classes.
 
@@ -761,7 +744,9 @@ class PythonParser:
 
         return relationships
 
-    def _infer_composition_aggregation(self, cls: Class, class_names: set, class_map: dict) -> list[Relationship]:
+    def _infer_composition_aggregation(
+        self, cls: Class, class_names: set, class_map: dict
+    ) -> list[Relationship]:
         """
         Infer composition/aggregation relationships from attributes.
 
@@ -811,7 +796,9 @@ class PythonParser:
 
         return relationships
 
-    def _infer_dependencies(self, cls: Class, class_names: set, class_map: dict) -> list[Relationship]:
+    def _infer_dependencies(
+        self, cls: Class, class_names: set, class_map: dict
+    ) -> list[Relationship]:
         """
         Infer dependency relationships from method parameters and return types.
 
@@ -829,7 +816,9 @@ class PythonParser:
         relationships = []
 
         # Collect types already in attributes (to avoid duplicates)
-        attribute_types = {self._get_base_type_name(attr.type) for attr in cls.attributes if attr.type is not None}
+        attribute_types = {
+            self._get_base_type_name(attr.type) for attr in cls.attributes if attr.type is not None
+        }
 
         # Track unique dependencies
         dependencies = set()
@@ -837,7 +826,7 @@ class PythonParser:
         for method in cls.methods:
             # Check parameters
             for param in method.parameters:
-                if param.name in ('self', 'cls'):
+                if param.name in ("self", "cls"):
                     continue
                 # Skip parameters without type annotations
                 if param.type is None:
@@ -895,8 +884,18 @@ class PythonParser:
         Returns:
             True if collection type
         """
-        collection_types = {'List', 'list', 'Set', 'set', 'Dict', 'dict',
-                           'Tuple', 'tuple', 'Sequence', 'Iterable'}
+        collection_types = {
+            "List",
+            "list",
+            "Set",
+            "set",
+            "Dict",
+            "dict",
+            "Tuple",
+            "tuple",
+            "Sequence",
+            "Iterable",
+        }
         return type_ref.name in collection_types
 
 
@@ -961,24 +960,33 @@ def parse_folder_to_project(folder_path: str, project_name: str | None = None) -
 
     # Directories to exclude from parsing
     EXCLUDED_DIRS = {
-        '.venv', 'venv', '__pycache__', '.git',
-        'node_modules', '.tox', 'build', 'dist',
-        '.eggs', '*.egg-info', '.pytest_cache',
-        '.mypy_cache', '.ruff_cache'
+        ".venv",
+        "venv",
+        "__pycache__",
+        ".git",
+        "node_modules",
+        ".tox",
+        "build",
+        "dist",
+        ".eggs",
+        "*.egg-info",
+        ".pytest_cache",
+        ".mypy_cache",
+        ".ruff_cache",
     }
 
     # Find all .py files recursively, excluding common directories
     all_py_files = folder.rglob("*.py")
-    py_files = sorted([
-        f for f in all_py_files
-        if not any(excluded in f.parts for excluded in EXCLUDED_DIRS)
-    ])
+    py_files = sorted(
+        [f for f in all_py_files if not any(excluded in f.parts for excluded in EXCLUDED_DIRS)]
+    )
 
     if not py_files:
         raise ValueError(f"No Python files found in: {folder_path}")
 
     # Group files by their parent directory
     from collections import defaultdict
+
     files_by_package = defaultdict(list)
 
     for py_file in py_files:
@@ -986,12 +994,12 @@ def parse_folder_to_project(folder_path: str, project_name: str | None = None) -
         relative_path = py_file.relative_to(folder)
 
         # Determine package name from directory structure
-        if relative_path.parent == Path('.'):
+        if relative_path.parent == Path("."):
             # File in root directory
             package_name = ""
         else:
             # File in subdirectory - use dot notation
-            package_name = str(relative_path.parent).replace('/', '.').replace('\\', '.')
+            package_name = str(relative_path.parent).replace("/", ".").replace("\\", ".")
 
         files_by_package[package_name].append(py_file)
 
@@ -1029,7 +1037,7 @@ def parse_folder_to_project(folder_path: str, project_name: str | None = None) -
                 name=package_name if package_name else display_name,
                 classes=package_classes,
                 relationships=package_relationships,
-                docstring=f"Package from {len(files)} Python file(s)"
+                docstring=f"Package from {len(files)} Python file(s)",
             )
             packages.append(package)
 

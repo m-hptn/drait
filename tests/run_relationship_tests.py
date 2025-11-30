@@ -7,8 +7,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from drait.parsers.python_parser import PythonParser
 from drait.metamodel import RelationshipType
+from drait.parsers.python_parser import PythonParser
 
 
 def test_simple_inheritance():
@@ -164,7 +164,7 @@ class Employee:
 
     assert len(composition) == 1  # Address
     assert len(aggregation) == 1  # Department
-    assert len(dependency) == 1   # Project
+    assert len(dependency) == 1  # Project
     print("✓ test_mixed_relationships passed")
 
 

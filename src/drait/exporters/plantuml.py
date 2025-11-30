@@ -4,18 +4,18 @@ PlantUML exporter for DRAIT metamodel.
 Converts DRAIT metamodel to PlantUML class diagram syntax for visualization.
 """
 
+from typing import Any
 
 from drait.metamodel import (
-    Project,
-    Package,
-    Class,
     Attribute,
+    Class,
     Method,
-    Parameter,
+    Package,
+    Project,
     Relationship,
+    RelationshipType,
     TypeReference,
     Visibility,
-    RelationshipType,
 )
 
 
@@ -162,7 +162,7 @@ class PlantUMLExporter:
         target_name = self._find_class_name(rel.target_id, classes)
 
         if not source_name or not target_name:
-            return f"' Relationship skipped: source or target not found"
+            return "' Relationship skipped: source or target not found"
 
         # Map relationship type to PlantUML syntax
         arrow = self._get_relationship_arrow(rel.type)
@@ -246,7 +246,9 @@ class PlantUMLExporter:
             modifiers.append("{abstract}")
 
         if modifiers:
-            method_str = f"{visibility} {' '.join(modifiers)} {method.name}({params_str}){return_type}"
+            method_str = (
+                f"{visibility} {' '.join(modifiers)} {method.name}({params_str}){return_type}"
+            )
 
         return method_str
 
@@ -286,9 +288,10 @@ class PlantUMLExporter:
         }
         return mapping.get(rel_type, "-->")
 
-    def _find_class_name(self, class_id, classes: list[Class]) -> str | None:
-        """Find class name by ID."""
+    def _find_class_name(self, class_id: Any, classes: list[Class]) -> str | None:
+        """Find class name by ID (accepts UUID or str)."""
         for cls in classes:
+            # Compare as-is (both should be UUID type)
             if cls.id == class_id:
                 return cls.name
         return None
@@ -305,7 +308,7 @@ class PlantUMLExporter:
         ]
 
 
-def export_to_file(project: Project, output_file: str, **kwargs) -> None:
+def export_to_file(project: Project, output_file: str, **kwargs: Any) -> None:
     """
     Export project to PlantUML file.
 
@@ -317,9 +320,9 @@ def export_to_file(project: Project, output_file: str, **kwargs) -> None:
     exporter = PlantUMLExporter(**kwargs)
     plantuml_content = exporter.export_project(project)
 
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
         f.write(plantuml_content)
 
     print(f"PlantUML diagram exported to: {output_file}")
     print(f"To generate image: plantuml {output_file}")
-    print(f"Or use online: https://www.plantuml.com/plantuml/uml/")
+    print("Or use online: https://www.plantuml.com/plantuml/uml/")

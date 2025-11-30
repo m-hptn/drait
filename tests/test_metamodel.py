@@ -9,29 +9,29 @@ Tests cover:
 - Data integrity and validation
 """
 
-import pytest
-from uuid import UUID
-
 import sys
 from pathlib import Path
+from uuid import UUID
+
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from drait.metamodel import (
-    Project,
-    Package,
-    Class,
     Attribute,
-    Method,
-    Parameter,
-    Relationship,
-    TypeReference,
+    Class,
     Decorator,
-    Import,
-    Position,
-    Visibility,
-    RelationshipType,
-    ParameterKind,
+    Method,
     Multiplicity,
+    Package,
+    Parameter,
+    ParameterKind,
+    Position,
+    Project,
+    Relationship,
+    RelationshipType,
+    TypeReference,
+    Visibility,
 )
 
 

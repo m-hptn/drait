@@ -8,7 +8,7 @@ and their mapping to Python code.
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
-from uuid import UUID, uuid4, uuid5, NAMESPACE_DNS
+from uuid import NAMESPACE_DNS, UUID, uuid4, uuid5
 
 
 # Helper function to generate deterministic UUIDs
@@ -22,15 +22,18 @@ def generate_deterministic_uuid(name: str, namespace_str: str = "drait") -> UUID
 
 # Enumerations
 
+
 class Visibility(str, Enum):
     """Visibility levels for class members."""
-    PUBLIC = "public"       # No underscore
+
+    PUBLIC = "public"  # No underscore
     PROTECTED = "protected"  # Single underscore _
-    PRIVATE = "private"     # Double underscore __
+    PRIVATE = "private"  # Double underscore __
 
 
 class RelationshipType(str, Enum):
     """Types of relationships between classes."""
+
     INHERITANCE = "inheritance"
     ASSOCIATION = "association"
     AGGREGATION = "aggregation"
@@ -41,14 +44,16 @@ class RelationshipType(str, Enum):
 
 class ParameterKind(str, Enum):
     """Kind of method parameters."""
+
     POSITIONAL = "positional"
     KEYWORD = "keyword"
     VAR_POSITIONAL = "var_positional"  # *args
-    VAR_KEYWORD = "var_keyword"        # **kwargs
+    VAR_KEYWORD = "var_keyword"  # **kwargs
 
 
 class Multiplicity(str, Enum):
     """Multiplicity/cardinality for relationships."""
+
     ZERO_TO_ONE = "0..1"
     ONE = "1"
     ZERO_TO_MANY = "0..*"
@@ -58,9 +63,11 @@ class Multiplicity(str, Enum):
 
 # Supporting Types
 
+
 @dataclass
 class Position:
     """Position and size information for diagram elements."""
+
     x: float
     y: float
     width: float | None = None
@@ -89,6 +96,7 @@ class Position:
 @dataclass
 class Import:
     """Represents a Python import statement."""
+
     module: str
     symbols: list[str] = field(default_factory=list)
     alias: str | None = None
@@ -121,6 +129,7 @@ class TypeReference:
         - list[str]: TypeReference(name="list", type_arguments=[TypeReference(name="str")])
         - int | None: TypeReference(name="int", is_optional=True)
     """
+
     name: str
     module: str | None = None
     type_arguments: list["TypeReference"] = field(default_factory=list)
@@ -141,9 +150,7 @@ class TypeReference:
         return cls(
             name=data["name"],
             module=data.get("module"),
-            type_arguments=[
-                cls.from_dict(arg) for arg in data.get("type_arguments", [])
-            ],
+            type_arguments=[cls.from_dict(arg) for arg in data.get("type_arguments", [])],
             is_optional=data.get("is_optional", False),
         )
 
@@ -163,6 +170,7 @@ class TypeReference:
 @dataclass
 class Decorator:
     """Represents a Python decorator."""
+
     name: str
     module: str | None = None
     arguments: dict[str, str] = field(default_factory=dict)
@@ -187,9 +195,11 @@ class Decorator:
 
 # Core Entities
 
+
 @dataclass
 class Parameter:
     """Represents a method parameter."""
+
     name: str
     type: TypeReference | None = None
     default_value: str | None = None
@@ -218,6 +228,7 @@ class Parameter:
 @dataclass
 class Attribute:
     """Represents a class attribute/field."""
+
     name: str
     type: TypeReference
     id: UUID = field(default_factory=uuid4)
@@ -261,6 +272,7 @@ class Attribute:
 @dataclass
 class Method:
     """Represents a class method/function."""
+
     name: str
     id: UUID = field(default_factory=uuid4)
     parameters: list[Parameter] = field(default_factory=list)
@@ -296,7 +308,9 @@ class Method:
             id=UUID(data["id"]),
             name=data["name"],
             parameters=[Parameter.from_dict(p) for p in data.get("parameters", [])],
-            return_type=TypeReference.from_dict(data["return_type"]) if data.get("return_type") else None,
+            return_type=TypeReference.from_dict(data["return_type"])
+            if data.get("return_type")
+            else None,
             visibility=Visibility(data.get("visibility", "public")),
             is_static=data.get("is_static", False),
             is_class_method=data.get("is_class_method", False),
@@ -310,6 +324,7 @@ class Method:
 @dataclass
 class Class:
     """Represents a Python class with attributes, methods, and metadata."""
+
     name: str
     id: UUID = field(default_factory=uuid4)  # Will be overridden in __post_init__
     attributes: list[Attribute] = field(default_factory=list)
@@ -322,7 +337,7 @@ class Class:
     position: Position | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Generate deterministic ID based on class name and source file."""
         # Use source file path if available for more uniqueness
         source_file = self.metadata.get("source_file", "")
@@ -366,6 +381,7 @@ class Class:
 @dataclass
 class Relationship:
     """Represents relationships between classes."""
+
     type: RelationshipType
     source_id: UUID
     target_id: UUID
@@ -386,8 +402,12 @@ class Relationship:
             "target_id": str(self.target_id),
             "source_role": self.source_role,
             "target_role": self.target_role,
-            "source_multiplicity": self.source_multiplicity.value if self.source_multiplicity else None,
-            "target_multiplicity": self.target_multiplicity.value if self.target_multiplicity else None,
+            "source_multiplicity": self.source_multiplicity.value
+            if self.source_multiplicity
+            else None,
+            "target_multiplicity": self.target_multiplicity.value
+            if self.target_multiplicity
+            else None,
             "is_navigable_from_source": self.is_navigable_from_source,
             "is_navigable_from_target": self.is_navigable_from_target,
         }
@@ -402,8 +422,12 @@ class Relationship:
             target_id=UUID(data["target_id"]),
             source_role=data.get("source_role"),
             target_role=data.get("target_role"),
-            source_multiplicity=Multiplicity(data["source_multiplicity"]) if data.get("source_multiplicity") else None,
-            target_multiplicity=Multiplicity(data["target_multiplicity"]) if data.get("target_multiplicity") else None,
+            source_multiplicity=Multiplicity(data["source_multiplicity"])
+            if data.get("source_multiplicity")
+            else None,
+            target_multiplicity=Multiplicity(data["target_multiplicity"])
+            if data.get("target_multiplicity")
+            else None,
             is_navigable_from_source=data.get("is_navigable_from_source", True),
             is_navigable_from_target=data.get("is_navigable_from_target", True),
         )
@@ -412,6 +436,7 @@ class Relationship:
 @dataclass
 class Package:
     """Represents a Python package/module containing classes."""
+
     name: str
     id: UUID = field(default_factory=uuid4)
     classes: list[Class] = field(default_factory=list)
@@ -446,6 +471,7 @@ class Package:
 @dataclass
 class Project:
     """Represents a complete software project with multiple packages and diagrams."""
+
     name: str
     id: UUID = field(default_factory=uuid4)
     version: str = "1.0.0"
